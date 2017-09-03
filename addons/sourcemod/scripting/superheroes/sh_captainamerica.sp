@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -45,7 +45,7 @@ public void OnPluginStart()
 	AutoExecConfig(true, "captainamerica", "sourcemod/superheromod");
 	
 	g_iHeroIndex = SuperHero_CreateHero("Captain America", g_CaptainamericaLevel.IntValue);
-	SuperHero_SetHeroInfo(g_iHeroIndex, "Super Shield", "Random invincibility, better change the higher level");
+	SuperHero_SetHeroInfo(g_iHeroIndex, "Super Shield", "Random invincibility, the higher level, the better chance");
 	
 	CreateTimer(1.0, Timer_Invincibility,_, TIMER_REPEAT);
 }

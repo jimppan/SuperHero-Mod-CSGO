@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -40,7 +40,7 @@ public void OnPluginStart()
 	AutoExecConfig(true, "anubis", "sourcemod/superheromod");
 	
 	g_iHeroIndex = SuperHero_CreateHero("Anubis", g_AnubisLevel.IntValue);
-	SuperHero_SetHeroInfo(g_iHeroIndex, "Dark Notices", "See Damage");
+	SuperHero_SetHeroInfo(g_iHeroIndex, "Dark Notices", "See damage dealt and damage taken");
 	
 	g_hSyncMyDamage = CreateHudSynchronizer();
 	g_hSyncEnemyDamage = CreateHudSynchronizer();
