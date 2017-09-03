@@ -10,9 +10,6 @@
 
 #pragma newdecls required
 
-#define FFADE_IN 0x0002        // Fade in
-#define FFADE_MODULATE 0x0004  // Modulate
-
 EngineVersion g_Game;
 
 ConVar g_VashLevel;
