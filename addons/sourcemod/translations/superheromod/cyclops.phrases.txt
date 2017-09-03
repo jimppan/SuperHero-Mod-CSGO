@@ -1,0 +1,7 @@
+"Phrases"
+{
+	"No Optic Blasts"
+	{
+		"en"	"No optic blasts left!"
+	}
+}

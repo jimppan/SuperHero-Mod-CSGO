@@ -1,0 +1,14 @@
+"Phrases"
+{
+	"Morphed"
+	{
+		"#format"		"{1:s}"
+		"en"	"{1} - YOU NOW LOOK LIKE THE ENEMY"
+	}
+	
+	"Unmorphed"
+	{
+		"#format"		"{1:s}"
+		"en"	"{1} - RETURNED TO SELF"
+	}
+}

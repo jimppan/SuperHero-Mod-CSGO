@@ -1,0 +1,8 @@
+"Phrases"
+{
+	"Revive"
+	{
+		"#format"		"{1:s},{2:s},{3:N},{4:N}"
+		"en"	"{1} {2} {3} used cosmic life force to revive {4}!"
+	}
+}
