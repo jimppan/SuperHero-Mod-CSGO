@@ -1,0 +1,101 @@
+"Phrases"
+{
+	"Select Super Power"
+	{
+		"#format"		"{1:d},{2:d}"
+		"en"			"Select Super Power (You've Selected {1}/{2})"
+	}
+	
+	"Too Many Powers"
+	{
+		"#format"		"{1:s}"
+		"en"			"{1} You cannot equip any more powers"
+	}
+	
+	"Too Many Bind Heroes"
+	{
+		"#format"		"{1:s},{2:d}"
+		"en"			"{1} You cannot choose more than {2} heroes that require binds"
+	}
+	
+	"Too Many High Level Heroes"
+	{
+		"#format"		"{1:s}"
+		"en"			"{1} You cannot pick any more heroes from that level"
+	}
+	
+	"Experience Load Next Round"
+	{
+		"#format"		"{1:s}"
+		"en"			"{1} Your XP will be loaded next round"
+	}
+	
+	"Not Allowed Drop"
+	{
+		"#format"		"{1:s}"
+		"en"			"{1} You are not allowed to drop heroes while alive"
+	}
+	
+	"Dropped Hero"
+	{
+		"#format"		"{1:s},{2:s}"
+		"en"			"{1} Dropped Hero: {2}"
+	}
+	
+	"Could Not Find Power"
+	{
+		"#format"		"{1:s},{2:s}"
+		"en"			"{1} Could Not Find Power to Drop: {2}"
+	}
+	
+	"Usage"
+	{
+		"en"			"Usage"
+	}
+	
+	"Set Level"
+	{
+		"#format"		"{1:s},{2:N},{3:d}"
+		"en"			"{1} You have set {2} level to {3}"
+	}
+	
+	"Set Experience"
+	{
+		"#format"		"{1:s},{2:N},{3:d}"
+		"en"			"{1} You have set {2} experience to {3}"
+	}
+	
+	"Max Level"
+	{
+		"#format"		"{1:s},{2:d}"
+		"en"			"{1} Max level is {2}"
+	}
+	
+	"My Heroes"
+	{
+		"en"			"My Heroes"
+	}
+	
+	"Invalid Hero"
+	{
+		"#format"		"{1:s},{2:s}"
+		"en"			"{1} {2} is not a valid hero!"
+	}
+	
+	"Who Has"
+	{
+		"#format"		"{1:s}"
+		"en"			"Who Has: {1}"
+	}
+	
+	"Level"
+	{
+		"en"			"Level"
+	}
+	
+	"Powers Cleared"
+	{
+		"#format"		"{1:s}"
+		"en"			"{1} You've cleared all of your powers!"
+	}
+}
