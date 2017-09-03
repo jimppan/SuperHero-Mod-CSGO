@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -37,7 +37,7 @@ bool g_bWeaponSwitchSpeedChange[MAXPLAYERS + 1] =  { true, ... }; 						//Should
 int g_iPlayerExperience[MAXPLAYERS + 1]; 												//gPlayerXP
 int g_iPlayerLevel[MAXPLAYERS + 1]; 													//gPlayerLevel
 int g_iPlayerPowers[MAXPLAYERS + 1][SH_MAXLEVELS + 1]; 									//gPlayerPowers - List of all Powers - Slot 0 is the superpower count 
-int g_iPlayerPowersLeft[MAXPLAYERS + 1][SH_MAXLEVELS + 1]; 								//gMaxPowersLeft
+//int g_iPlayerPowersLeft[MAXPLAYERS + 1][SH_MAXLEVELS + 1]; 								//gMaxPowersLeft
 int g_iPlayerMenuChoices[MAXPLAYERS + 1][SH_MAXHEROES + 1];								//gPlayerMenuChoices - This will be filled in with # of heroes available
 int g_iPlayerBinds[MAXPLAYERS + 1][SH_MAXBINDPOWERS + 1]; 								//gPlayerBinds - What superpowers are the bind keys bound
 int g_iPlayerMaxHealth[MAXPLAYERS + 1];													//gMaxHealth
@@ -87,7 +87,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.01",
+	name = "SuperHero Mod CS:GO v1.02",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -1050,17 +1050,17 @@ public Action Command_Heroes(int client, int args)
 	if (lvllimit == 0 )
 		lvllimit = SH_MAXLEVELS;
 
-	for(int i = 0; i <= lvllimit; i++) 
+	/*for(int i = 0; i <= lvllimit; i++) 
 	{
 		if(playerLevel >= i)
 			g_iPlayerPowersLeft[client][i] = playerLevel - i + lvllimit;
 		else 
 			g_iPlayerPowersLeft[client][i] = 0;
-	}
-
+	}*/
+	
 	// Now decrement the level powers that they've picked
 	int heroIndex, heroLevel;
-
+	/*
 	for (int i = 1; i <= playerPowerCount && i <= SH_MAXLEVELS; i++) 
 	{
 		heroIndex = g_iPlayerPowers[client][i];
@@ -1087,10 +1087,10 @@ public Action Command_Heroes(int client, int args)
 				}
 			}
 		}
-	}
+	}*/
 	
 	// OK BUILD A LIST OF HEROES THIS PERSON CAN PICK FROM
-	g_iPlayerMenuChoices[client][0] = 0; // <- 0 choices so far
+	//g_iPlayerMenuChoices[client][0] = 0; // <- 0 choices so far
 	int count = 0; 
 	bool thisEnabled;
 
@@ -1101,7 +1101,7 @@ public Action Command_Heroes(int client, int args)
 		thisEnabled = false;
 		if(playerLevel >= heroLevel) 
 		{
-			if (g_iPlayerPowersLeft[client][heroLevel] > 0 && !(g_iPlayerBinds[client][0] >= g_MaxBinds.IntValue && g_hHeroes[heroIndex][requiresBind]))
+			if (/*g_iPlayerPowersLeft[client][heroLevel] > 0 && */!(g_iPlayerBinds[client][0] >= g_MaxBinds.IntValue && g_hHeroes[heroIndex][requiresBind]))
 				thisEnabled = true;
 				
 			// Don't want to present this power if the player already has it!
@@ -1486,19 +1486,20 @@ public int HeroMenuHandler(Menu menu, MenuAction action, int param1, int param2)
 			if(heroIndex < 0 || heroIndex >= g_iHeroCount)
 				return 0;
 			
-			int heroLevel = GetHeroLevel(heroIndex);
+			//int heroLevel = GetHeroLevel(heroIndex);
 			if ((g_iPlayerBinds[param1][0] >= g_MaxBinds.IntValue && g_hHeroes[heroIndex][requiresBind])) 
 			{
 				PrintToChat(param1, "%t", "Too Many Bind Heroes", SH_PREFIX, g_MaxBinds.IntValue);
 				Command_Heroes(param1, 0);
 				return 0;
 			}
-			else if (g_iPlayerPowersLeft[param1][heroLevel] <= 0) 
+			/*else if (g_iPlayerPowersLeft[param1][heroLevel] <= 0) 
 			{
 				PrintToChat(param1, "%t", "Too Many High Level Heroes", SH_PREFIX);
 				Command_Heroes(param1, 0);
 				return 0;
 			}
+			*/
 		
 			char message[256];
 			if (!g_hHeroes[heroIndex][requiresBind]) 
