@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -87,7 +87,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.0",
+	name = "SuperHero Mod CS:GO v1.01",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -225,7 +225,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int err_
 	CreateNative("SuperHero_PlayDenySound", Native_PlayDenySound);
 	CreateNative("SuperHero_SetChangeWeaponSpeedBool", Native_SetChangeWeaponSpeedBool);
 	CreateNative("SuperHero_SetHeroPrimaryWeapon", Native_SetHeroPrimaryWeapon);
-	CreateNative("SuperHero_SetHeroSecondaryWeapon", Native_SetHeroPrimaryWeapon);
+	CreateNative("SuperHero_SetHeroSecondaryWeapon", Native_SetHeroSecondaryWeapon);
 	CreateNative("SuperHero_GetHighestPrimaryWeaponLevel", Native_GetHighestPrimaryWeaponLevel);
 	CreateNative("SuperHero_GetHighestSecondaryWeaponLevel", Native_GetHighestSecondaryWeaponLevel);
 	CreateNative("SuperHero_GetHighestLevelHero", Native_GetHighestLevelHero);
