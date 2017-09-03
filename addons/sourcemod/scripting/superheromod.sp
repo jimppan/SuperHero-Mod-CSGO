@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.02"
+#define PLUGIN_VERSION "1.03"
 
 #include <sourcemod>
 #include <sdktools>
@@ -87,7 +87,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.02",
+	name = "SuperHero Mod CS:GO v1.03",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -1090,7 +1090,7 @@ public Action Command_Heroes(int client, int args)
 	}*/
 	
 	// OK BUILD A LIST OF HEROES THIS PERSON CAN PICK FROM
-	//g_iPlayerMenuChoices[client][0] = 0; // <- 0 choices so far
+	g_iPlayerMenuChoices[client][0] = 0; // <- 0 choices so far
 	int count = 0; 
 	bool thisEnabled;
 
@@ -1126,7 +1126,7 @@ public Action Command_Heroes(int client, int args)
 	for (int i = 0; i < g_iHeroCount; i++ ) 
 	{
 		// Only allow a selection from powers the player doesn't have
-		if (i > g_iPlayerMenuChoices[client][0]) 
+		if (i >= g_iPlayerMenuChoices[client][0]) 
 			continue;
 			
 		heroIndex = g_iPlayerMenuChoices[client][i+1];
