@@ -35,7 +35,7 @@ public void OnPluginStart()
 	{
 		SetFailState("This plugin is for CSGO only.");	
 	}
-	g_BlackpantherLevel = CreateConVar("superheromod_blackpanther_level", "8");
+	g_BlackpantherLevel = CreateConVar("superheromod_blackpanther_level", "0");
 	AutoExecConfig(true, "blackpanther", "sourcemod/superheromod");
 	
 	g_iHeroIndex = SuperHero_CreateHero("Black Panther", g_BlackpantherLevel.IntValue);

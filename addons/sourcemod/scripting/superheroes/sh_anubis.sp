@@ -36,7 +36,7 @@ public void OnPluginStart()
 	{
 		SetFailState("This plugin is for CSGO only.");	
 	}
-	g_AnubisLevel = CreateConVar("superheromod_anubis_level", "8");
+	g_AnubisLevel = CreateConVar("superheromod_anubis_level", "0");
 	AutoExecConfig(true, "anubis", "sourcemod/superheromod");
 	
 	g_iHeroIndex = SuperHero_CreateHero("Anubis", g_AnubisLevel.IntValue);
