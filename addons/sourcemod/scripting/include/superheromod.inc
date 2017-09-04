@@ -178,6 +178,17 @@ native int SuperHero_GetMaxHealth(int client);
 // return: player max armor
 native int SuperHero_GetMaxArmor(int client);
 
+// Gets the players max speed (from all of his heroes together, or max speed for a weapon if weaponid > CSGOWeaponID_NONE)
+// param1: player you wanna get speed from
+// param2: what weapon id you wanna get max speed from (CSGOWeaponID_NONE for no specific weapon)
+// param3: float buffer to store the result speed
+native void SuperHero_GetMaxSpeed(int client, int weaponid, float& resultspeed);
+
+// Gets the players lowest gravity (from all of his heroes together)
+// param1: player you wanna get lowest gravity from
+// param2: float buffer to store the result gravity
+native void SuperHero_GetGravity(int client, float& resultgravity);
+
 // Gets the amount of levels that are loaded by configs/superhero.ini
 // return: max levels
 native int SuperHero_GetLevelCount();

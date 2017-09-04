@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -9,9 +9,6 @@
 #include <superheromod>
 
 #pragma newdecls required
-
-#define FFADE_IN 0x0002        // Fade in
-#define FFADE_MODULATE 0x0004  // Modulate
 
 EngineVersion g_Game;
 
@@ -40,7 +37,7 @@ public void OnPluginStart()
 	}
 	g_MorpheusLevel = CreateConVar("superheromod_morpheus_level", "8");
 	g_MorpheusGravity = CreateConVar("superheromod_morpheus_gravity", "0.35", "Amount of gravity morpheus has");
-	g_MorpheusFireRate = CreateConVar("superheromod_morpheus_attack_speed", "2.0", "Amount of times fire rate morpheus mp5 should have");
+	g_MorpheusFireRate = CreateConVar("superheromod_morpheus_attack_speed", "1.5", "Amount of times fire rate morpheus mp5 should have");
 	AutoExecConfig(true, "morpheus", "sourcemod/superheromod");
 	
 	HookEvent("weapon_fire", Event_WeaponFire, EventHookMode_Post);
@@ -111,7 +108,11 @@ public void SuperHero_OnPlayerSpawned(int client, bool newroundspawn)
 	if(!g_bHasMorpheus[client])
 		return;
 	
-	GivePlayerItem(client, "weapon_mp7");
+	if(SuperHero_GetHighestPrimaryWeaponLevel(client) == view_as<int>(CSGOWeaponID_MP7))
+	{
+		StripPrimary(client);
+		GivePlayerItem(client, "weapon_mp7");
+	}
 }
 
 public bool OnClientConnect(int client, char[]rejectmsg, int maxlen)

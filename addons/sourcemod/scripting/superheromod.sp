@@ -200,6 +200,8 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int err_
 	CreateNative("SuperHero_SetHeroDamageMultiplier", Native_SetHeroDamageMultiplier);
 	CreateNative("SuperHero_GetMaxHealth", Native_GetMaxHealth);
 	CreateNative("SuperHero_GetMaxArmor", Native_GetMaxArmor);
+	CreateNative("SuperHero_GetMaxSpeed", Native_GetMaxSpeed);
+	CreateNative("SuperHero_GetGravity", Native_GetGravity);
 	CreateNative("SuperHero_GetLevelCount", Native_GetLevelCount);
 	CreateNative("SuperHero_GetLevelExperience", Native_GetLevelExperience);
 	CreateNative("SuperHero_GetPlayerLevel", Native_GetPlayerLevel);
@@ -374,6 +376,29 @@ public int Native_GetMaxArmor(Handle plugin, int numParams)
 		return 0;
 	
 	return g_iPlayerMaxArmor[client];
+}
+
+public int Native_GetMaxSpeed(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	int weaponid = GetNativeCell(2);
+	if(!IsValidClient(client))
+		return;
+	
+	float speed = GetMaxSpeed(client, weaponid);
+	SetNativeCellRef(3, speed);
+	
+}
+
+public int Native_GetGravity(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	
+	if(!IsValidClient(client))
+		return;
+	
+	float gravity = GetGravity(client);
+	SetNativeCellRef(2, gravity);
 }
 
 public int Native_GetLevelCount(Handle plugin, int numParams)
@@ -683,7 +708,7 @@ public int Native_SetHeroSecondaryWeapon(Handle plugin, int numParams)
 
 public int Native_GetHighestPrimaryWeaponLevel(Handle plugin, int numParams)
 {
-	CSGOWeaponID weaponid = CSGOWeaponID_NONE;
+	int weaponid = 0;
 	
 	int client = GetNativeCell(1);
 	if(!IsValidClient(client))
@@ -705,8 +730,8 @@ public int Native_GetHighestPrimaryWeaponLevel(Handle plugin, int numParams)
 		if(g_HeroPrimaryWeapon[heroIndex] == CSGOWeaponID_NONE)
 			continue;
 
-		weapons.Push(g_HeroPrimaryWeapon[heroIndex]);
-		heroes.Push(GetHeroLevel(heroIndex));
+		weapons.Push(view_as<int>(g_HeroPrimaryWeapon[heroIndex]));
+		heroes.Push(heroIndex);
 	}
 	
 	for (int i = 0; i < heroes.Length; i++)
@@ -722,12 +747,12 @@ public int Native_GetHighestPrimaryWeaponLevel(Handle plugin, int numParams)
 	delete weapons;
 	delete heroes;
 	
-	return view_as<int>(weaponid);
+	return weaponid;
 }
 
 public int Native_GetHighestSecondaryWeaponLevel(Handle plugin, int numParams)
 {
-	CSGOWeaponID weaponid = CSGOWeaponID_NONE;
+	int weaponid = 0;
 	int client = GetNativeCell(1);
 	if(!IsValidClient(client))
 		return view_as<int>(weaponid);
@@ -748,8 +773,8 @@ public int Native_GetHighestSecondaryWeaponLevel(Handle plugin, int numParams)
 		if(g_HeroSecondaryWeapon[heroIndex] == CSGOWeaponID_NONE)
 			continue;
 
-		weapons.Push(g_HeroSecondaryWeapon[heroIndex]);
-		heroes.Push(GetHeroLevel(heroIndex));
+		weapons.Push(view_as<int>(g_HeroSecondaryWeapon[heroIndex]));
+		heroes.Push(heroIndex);
 	}
 	
 	for (int i = 0; i < heroes.Length; i++)
@@ -765,7 +790,7 @@ public int Native_GetHighestSecondaryWeaponLevel(Handle plugin, int numParams)
 	delete weapons;
 	delete heroes;
 	
-	return view_as<int>(weaponid);
+	return weaponid;
 }
 
 public int Native_GetHighestLevelHero(Handle plugin, int numParams)

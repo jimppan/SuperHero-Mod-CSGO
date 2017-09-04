@@ -74,7 +74,7 @@ public void SuperHero_OnPlayerSpawned(int client, bool newroundspawn)
 {
 	if(!g_bHasVash[client])
 		return;
-		
+	
 	if(SuperHero_GetHighestSecondaryWeaponLevel(client) == view_as<int>(CSGOWeaponID_DEAGLE))
 	{
 		StripSecondary(client);

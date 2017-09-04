@@ -179,7 +179,6 @@ public void OnMapStart()
 {
 	AddFileToDownloadsTable("sound/superheromod/hook.mp3");
 	PrecacheSoundAny(HOOK_SOUND, true);
-	PrecacheModel("materials/sprites/purplelaser1.vmt");
 }
 
 stock void KillBeam(int client)

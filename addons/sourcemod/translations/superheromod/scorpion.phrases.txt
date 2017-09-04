@@ -1,0 +1,7 @@
+"Phrases"
+{
+	"No Hooks Left"
+	{
+		"en"	"No hooks left!"
+	}
+}
