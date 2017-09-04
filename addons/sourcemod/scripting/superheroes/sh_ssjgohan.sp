@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -193,9 +193,15 @@ public void Kamehameha(int client)
 
 stock void CreateKameBeam(int client)
 {
-	float pos[3];
-	GetClientAbsOrigin(client, pos);
-	pos[2] += 50.0;
+	float vecView[3], vecFwd[3], vecPos[3];
+
+	GetClientEyeAngles(client, vecView);
+	GetAngleVectors(vecView, vecFwd, NULL_VECTOR, NULL_VECTOR);
+	GetClientEyePosition(client, vecPos);
+
+	vecPos[0] += vecFwd[0] * 50.0;
+	vecPos[1] += vecFwd[1] * 50.0;
+	vecPos[2] += vecFwd[2] * 50.0;
 	
 	int prop = CreateEntityByName("prop_physics_override");
 	g_iBeam[client] = EntIndexToEntRef(prop);
@@ -204,7 +210,7 @@ stock void CreateKameBeam(int client)
 	DispatchKeyValue(prop, "model", "models/weapons/w_ied_dropped.mdl");
 	DispatchSpawn(prop);
 	ActivateEntity(prop);
-	TeleportEntity(prop, pos, NULL_VECTOR, NULL_VECTOR);
+	TeleportEntity(prop, vecPos, NULL_VECTOR, NULL_VECTOR);
 	SetEntPropEnt(prop, Prop_Data, "m_hOwnerEntity", client);
 	SetEntProp(prop, Prop_Send, "m_fEffects", 32); //EF_NODRAW
 	int ent = CreateEntityByName("env_sprite_oriented");
@@ -216,7 +222,7 @@ stock void CreateKameBeam(int client)
 	DispatchKeyValue(ent, "model", BEAM_HEAD); 
 	DispatchSpawn(ent);
 	SetEntPropEnt(ent, Prop_Data, "m_hOwnerEntity", client);
-	TeleportEntity(ent, pos, NULL_VECTOR, NULL_VECTOR);
+	TeleportEntity(ent, vecPos, NULL_VECTOR, NULL_VECTOR);
 
 	SetVariantString("!activator");
 	AcceptEntityInput(ent, "SetParent", prop);
@@ -235,6 +241,15 @@ public Action Timer_Beam(Handle timer, any data)
 			g_hTimerCharge[client] = INVALID_HANDLE;
 			return Plugin_Stop;
 		}
+		
+		if(!IsPlayerAlive(client))
+		{
+			AcceptEntityInput(entity, "Kill");
+			g_iBeam[client] = INVALID_ENT_REFERENCE;
+			g_hTimerCharge[client] = INVALID_HANDLE;
+			return Plugin_Stop;
+		}
+
 		float entityPos[3], aimPos[3];
 	
 		float eyeAngles[3], eyePos[3];
@@ -281,6 +296,13 @@ public Action Timer_Beam(Handle timer, any data)
 	}
 	else
 	{
+		int entity = EntRefToEntIndex(g_iBeam[client]);
+		if(entity != INVALID_ENT_REFERENCE)
+		{
+			AcceptEntityInput(entity, "Kill");
+			g_iBeam[client] = INVALID_ENT_REFERENCE;
+			g_hTimerCharge[client] = INVALID_HANDLE;
+		}
 		return Plugin_Stop;
 	}
 	
@@ -323,6 +345,7 @@ public void EndKameBeam(int client, int entity)
 	TE_SetupGlowSprite(entityPos, g_iExplosion, 3.0, scale, 50);
 	TE_SendToAll();
 	AcceptEntityInput(entity, "Kill");
+	g_iBeam[client] = INVALID_ENT_REFERENCE;
 	g_bCharging[client] = false;
 	g_bFiringBeam[client] = false;
 }
