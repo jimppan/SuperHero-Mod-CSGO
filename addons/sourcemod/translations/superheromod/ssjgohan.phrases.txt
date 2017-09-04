@@ -1,0 +1,7 @@
+"Phrases"
+{
+	"Equip Knife"
+	{
+		"en"	"EQUIP KNIFE TO FIRE KAMEHAMEHA"
+	}
+}

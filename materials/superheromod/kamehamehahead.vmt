@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" "superheromod/kamehamehahead"
+	"$translucent" "1"
+	"$color" "{0.0 150.0 230.0}"
+}
