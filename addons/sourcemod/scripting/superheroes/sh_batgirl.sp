@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -102,7 +102,6 @@ public void SuperHero_OnHeroBind(int client, int heroIndex, int key)
 			
 			
 			SetEntPropFloat(client, Prop_Data, "m_flGravity", 0.001);
-			SetEntPropFloat(client, Prop_Data, "m_flLaggedMovementValue", 1.0);
 			CreateWebBeam(client);
 			
 			SetVariantString("!activator");
