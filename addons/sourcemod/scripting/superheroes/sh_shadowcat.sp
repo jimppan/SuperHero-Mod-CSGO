@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -166,6 +166,7 @@ public void ShadowCatEndNoclip(int client)
 	
 	if(GetEntityMoveType(client) == MOVETYPE_NOCLIP)
 	{
+		SuperHero_SetChangeWeaponSpeedBool(client, true);
 		SetEntityMoveType(client, MOVETYPE_WALK);
 		
 		float clientPos[3], vecMins[3], vecMaxs[3];

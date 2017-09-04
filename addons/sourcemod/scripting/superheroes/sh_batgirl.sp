@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -29,8 +29,6 @@ int g_iHooksLeft[MAXPLAYERS + 1];
 int g_iHeroIndex;
 float g_fHookLength[MAXPLAYERS + 1];
 float g_vecHookPos[MAXPLAYERS + 1][3];
-
-Handle g_hTimerHook[MAXPLAYERS + 1] = { INVALID_HANDLE, ... };
 
 public Plugin myinfo = 
 {
@@ -104,11 +102,11 @@ public void SuperHero_OnHeroBind(int client, int heroIndex, int key)
 			
 			
 			SetEntPropFloat(client, Prop_Data, "m_flGravity", 0.001);
+			SetEntPropFloat(client, Prop_Data, "m_flLaggedMovementValue", 1.0);
 			CreateWebBeam(client);
 			
 			SetVariantString("!activator");
 			AcceptEntityInput(EntRefToEntIndex(g_iHook[client]), "SetParent", client);
-			g_hTimerHook[client] = CreateTimer(HOOK_REFRESH_TIME, Timer_Hook, GetClientUserId(client), TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 			float pos[3];
 			GetClientEyePosition(client, pos);
 			EmitAmbientSoundAny(HOOK_SOUND, pos);
@@ -121,15 +119,10 @@ public void SuperHero_OnHeroBind(int client, int heroIndex, int key)
 	}
 }
 
-public Action Timer_Hook(Handle timer, any userid)
+public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
-	int client = GetClientOfUserId(userid);
-	if(!IsValidClient(client))
-		return Plugin_Stop;
-		
-	BatgirlCheapReel(client);
-	
-	return Plugin_Continue;
+	if(g_bHooked[client])
+		BatgirlCheapReel(client);
 }
 
 stock void BatgirlCheapReel(int client)
@@ -144,6 +137,7 @@ stock void BatgirlCheapReel(int client)
 		BatgirlHookOff(client);
 		return;
 	}
+	
 
 	float user_origin[3];
 	float velocity[3];
@@ -165,14 +159,10 @@ stock void BatgirlCheapReel(int client)
 public void BatgirlHookOff(int client)
 {
 	g_bHooked[client] = false;
-
 	KillBeam(client);
 
-	if (IsValidClient(client)) 
+	if (IsValidClient(client))
 		SuperHero_ResetGravity(client);
-
-	if(g_hTimerHook[client] != INVALID_HANDLE)
-		KillTimer(g_hTimerHook[client]);
 }
 
 public void OnMapStart()
