@@ -170,8 +170,11 @@ public void SQLQuery_LoadPlayerData(Database db, DBResultSet results, const char
 	{
 
 		if (results.RowCount == 0)
-		{
-			PrintToServer("No Saved XP to Load for %N", client);
+		{	
+			g_iPlayerExperience[client] = g_StartExperience.IntValue;
+			g_iPlayerLevel[client] = GetPlayerLevel(client);
+			SetLevel(client, g_iPlayerLevel[client]);
+			//PrintToServer("No Saved XP to Load for %N", client);
 			return;
 		}
 		

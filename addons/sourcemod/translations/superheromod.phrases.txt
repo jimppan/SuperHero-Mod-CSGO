@@ -98,4 +98,10 @@
 		"#format"		"{1:s}"
 		"en"			"{1} You've cleared all of your powers!"
 	}
+	
+	"Hero Cooldown"
+	{
+		"#format"		"{1:s},{2:d}"
+		"en"			"{1} Cooldown: {2}"
+	}
 }

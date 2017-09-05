@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.04"
+#define PLUGIN_VERSION "1.05"
 
 #include <sourcemod>
 #include <sdktools>
@@ -22,7 +22,7 @@ int g_iHeroCount = 0; 																	//gSuperHeroCount
 int g_iLevelExperience[SH_MAXLEVELS + 1]; 												//gXPLevel
 int g_iGivenExperience[SH_MAXLEVELS + 1]; 												//gXPGiven
 Handle g_hHeroes[SH_MAXHEROES][HeroEnum]; 												//gSuperHeros - The Big Array that holds all of the heroes, superpowers, help, and other important info
-//Handle g_hHelpHudSync;																//gHelpHudSync
+Handle g_hHelpCooldownSync;
 Handle g_hHeroHudSync;																	//gHeroHudSync
 Handle g_hCoolDownTimers[MAXPLAYERS + 1][SH_MAXHEROES + 1];
 Database g_hPlayerData;
@@ -37,7 +37,7 @@ bool g_bWeaponSwitchSpeedChange[MAXPLAYERS + 1] =  { true, ... }; 						//Should
 int g_iPlayerExperience[MAXPLAYERS + 1]; 												//gPlayerXP
 int g_iPlayerLevel[MAXPLAYERS + 1]; 													//gPlayerLevel
 int g_iPlayerPowers[MAXPLAYERS + 1][SH_MAXLEVELS + 1]; 									//gPlayerPowers - List of all Powers - Slot 0 is the superpower count 
-//int g_iPlayerPowersLeft[MAXPLAYERS + 1][SH_MAXLEVELS + 1]; 								//gMaxPowersLeft
+//int g_iPlayerPowersLeft[MAXPLAYERS + 1][SH_MAXLEVELS + 1]; 							//gMaxPowersLeft
 int g_iPlayerMenuChoices[MAXPLAYERS + 1][SH_MAXHEROES + 1];								//gPlayerMenuChoices - This will be filled in with # of heroes available
 int g_iPlayerBinds[MAXPLAYERS + 1][SH_MAXBINDPOWERS + 1]; 								//gPlayerBinds - What superpowers are the bind keys bound
 int g_iPlayerMaxHealth[MAXPLAYERS + 1];													//gMaxHealth
@@ -47,6 +47,7 @@ int g_iPlayerStunTimer[MAXPLAYERS + 1];													//gPlayerStunTimer
 int g_iPlayerFlags[MAXPLAYERS + 1]; 													//gPlayerFlags
 int g_iPlayerGodTimer[MAXPLAYERS + 1];													//gPlayerGodTimer
 float g_fPlayerStunSpeed[MAXPLAYERS + 1];												//gPlayerStunSpeed
+float g_fPlayerCooldownEndTime[MAXPLAYERS + 1][SH_MAXHEROES + 1];						//For timer hud stuff in PowerKeyDown func
 
 //Hero variables
 int g_iHeroMaxHealth[SH_MAXHEROES];														//gHeroMaxHealth
@@ -74,6 +75,7 @@ ConVar g_Levels;
 ConVar g_MaxBinds;
 ConVar g_DropAlive;
 ConVar g_HeadshotMultiplier;
+ConVar g_StartExperience;
 
 //Forwards
 Handle g_hOnHeroInitialized;
@@ -87,7 +89,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.04",
+	name = "SuperHero Mod CS:GO v1.05",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -101,7 +103,8 @@ public void OnPluginStart()
 	
 	if(!DirExists("cfg/sourcemod/superheromod"))
 		CreateDirectory("cfg/sourcemod/superheromod", 511); //tbh I have no idea what im doing, but it works
-	
+	if(!FileExists("addons/sourcemod/data/sqlite/superheromod.sq3"))
+		OpenFile("addons/sourcemod/data/sqlite/superheromod.sq3", "r"); 
 	g_Game = GetEngineVersion();
 	if(g_Game != Engine_CSGO)
 	{
@@ -153,6 +156,7 @@ public void OnPluginStart()
 	g_MaxBinds = 						CreateConVar("superheromod_max_binds", "3", "Max amount of super power binds");
 	g_DropAlive =						CreateConVar("superheromod_drop_alive", "0", "Drop power while alive");
 	g_HeadshotMultiplier = 				CreateConVar("superheromod_headshot_multiplier", "1.5", "Amount of times points you should get for killing with a headshot");
+	g_StartExperience = 				CreateConVar("superheromod_start_experience", "0", "Amount of experience new players should get on their first join");
 	
 	g_hOnHeroInitialized =				CreateGlobalForward("SuperHero_OnHeroInitialized", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 	g_hOnPlayerSpawned = 				CreateGlobalForward("SuperHero_OnPlayerSpawned", ET_Ignore, Param_Cell, Param_Cell);
@@ -161,13 +165,13 @@ public void OnPluginStart()
 	g_hOnPlayerTakeDamagePost =			CreateGlobalForward("SuperHero_OnPlayerTakeDamagePost", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
 	g_hOnHeroBind = 					CreateGlobalForward("SuperHero_OnHeroBind", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 
-	//g_hHelpHudSync = 					CreateHudSynchronizer();
 	g_hHeroHudSync = 					CreateHudSynchronizer();
-	
+	g_hHelpCooldownSync =				CreateHudSynchronizer();
+
 	//Database.Connect(SQLConnection_Callback, "superheromod");
 	KeyValues kv = CreateKeyValues("");
 	kv.SetString("driver", "sqlite");
-	kv.SetString("database", "sourcemod");
+	kv.SetString("database", "superheromod");
 	
 	char wedontcareaboutnoerrorscuh[420];
 	g_hPlayerData = SQL_ConnectCustom(kv, wedontcareaboutnoerrorscuh, sizeof(wedontcareaboutnoerrorscuh), true);
@@ -604,6 +608,7 @@ public int Native_SetPlayerHeroCooldown(Handle plugin, int numParams)
 	if(!IsValidClient(client))
 		return;
 		
+	g_fPlayerCooldownEndTime[client][heroIndex] = GetGameTime() + cooldown;
 	g_bPlayerInCooldown[client][heroIndex] = true;
 	DataPack pack = CreateDataPack();
 	g_hCoolDownTimers[client][heroIndex] = CreateDataTimer(cooldown, Timer_Cooldown, pack);
@@ -616,6 +621,7 @@ public int Native_EndPlayerHeroCooldown(Handle plugin, int numParams)
 	int client = GetNativeCell(1);
 	int heroIndex = GetNativeCell(2);
 	EndPlayerHeroCooldown(client, heroIndex);
+	g_fPlayerCooldownEndTime[client][heroIndex] = 0.0;
 }
 
 public int Native_IsPlayerHeroInCooldown(Handle plugin, int numParams)
@@ -990,6 +996,11 @@ public Action PowerKeyDown(int client, int args)
 	if (g_bPowerDown[client][key]) 
 		return Plugin_Handled;
 		
+	if(g_bPlayerInCooldown[client][heroIndex])
+	{
+		SetHudTextParams(0.35, 0.80, 1.0, 255, 255, 0, 255);
+		ShowSyncHudText(client, g_hHelpCooldownSync, "%t", "Hero Cooldown", g_hHeroes[heroIndex][szHero], RoundToNearest(g_fPlayerCooldownEndTime[client][heroIndex] - GetGameTime()));
+	}
 	g_bPowerDown[client][key] = true;
 
 	if(PlayerHasPower(client, heroIndex))
@@ -1569,6 +1580,11 @@ public bool OnClientConnect(int client, char[] rejectmsg, int maxlen)
 
 public void OnClientPutInServer(int client)
 {
+	//if(!IsFakeClient(client) && g_StartExperience.IntValue > 0)
+	//{
+		
+	//}
+	
 	SDKHook(client, SDKHook_OnTakeDamage, OnPlayerTakeDamage);
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnPlayerSwitchWeapon);
 }
