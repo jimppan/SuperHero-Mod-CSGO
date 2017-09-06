@@ -83,6 +83,7 @@ public void SuperHero_OnPlayerSpawned(int client, bool newroundspawn)
 {
 	SuperHero_EndPlayerHeroCooldown(client, g_iHeroIndex);
 	g_bFiringBeam[client] = false;
+	g_bCharging[client] = false;
 }
 
 public void SuperHero_OnHeroBind(int client, int heroIndex, int key)
@@ -118,8 +119,7 @@ public void SuperHero_OnHeroBind(int client, int heroIndex, int key)
 					return;
 				}
 			}
-			float pos[3];
-			GetClientEyePosition(client, pos);
+
 			EmitSoundToAllAny(KAMEHAME_SOUND, client);
 			g_fChargeTime[client] = 0.0;
 			g_bCharging[client] = true;
