@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.02"
+#define PLUGIN_VERSION "1.03"
 
 #include <sourcemod>
 #include <sdktools>
@@ -35,7 +35,6 @@ int g_iHeroIndex;
 int g_iBeam[MAXPLAYERS + 1] =  { INVALID_ENT_REFERENCE, ... };
 bool g_bFiringBeam[MAXPLAYERS + 1];
 bool g_bCharging[MAXPLAYERS + 1];
-bool g_bHasSSJGohan[MAXPLAYERS + 1];
 Handle g_hTimerCharge[MAXPLAYERS + 1] = { INVALID_HANDLE, ... };
 Handle g_hHudCharge;
 public Plugin myinfo = 
@@ -78,8 +77,6 @@ public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)
 {
 	if(heroIndex != g_iHeroIndex)
 		return;
-	
-	g_bHasSSJGohan[client] = (mode ? true : false);
 }
 
 public void SuperHero_OnPlayerSpawned(int client, bool newroundspawn)
