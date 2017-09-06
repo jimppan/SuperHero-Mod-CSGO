@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -14,16 +14,14 @@
 #define BEAM_SOUND "superheromod/beamhead.mp3"
 #define HA_SOUND "superheromod/gohan_ha.mp3"
 #define KAMEHAME_SOUND "superheromod/gohan_kamehame.mp3"
-//#define BEAM_TRAIL "materials/superheromod/kamehamehatrail.vmt"
 #define BEAM_HEAD "materials/superheromod/kamehamehahead.vmt"
 #define BEAM_EXPLOSION "materials/superheromod/kamehamehaexplosion.vmt"
 #define BEAM_TRAIL "materials/effects/blueblacklargebeam.vmt"
-//#define BEAM_HEAD "materials/particle/particle_flares/particle_flare_004.vmt"
 EngineVersion g_Game;
 
 ConVar g_SSJGohanLevel;
 ConVar g_SSJGohanDamageMultiplier;
-ConVar g_SSJGohanRadius;
+ConVar g_SSJGohanRadiusMultiplier;
 ConVar g_SSJGohanCooldown;
 ConVar g_SSJGohanBeamSpeed;
 ConVar g_SSJGohanMinChargeTime;
@@ -39,7 +37,7 @@ bool g_bFiringBeam[MAXPLAYERS + 1];
 bool g_bCharging[MAXPLAYERS + 1];
 bool g_bHasSSJGohan[MAXPLAYERS + 1];
 Handle g_hTimerCharge[MAXPLAYERS + 1] = { INVALID_HANDLE, ... };
-
+Handle g_hHudCharge;
 public Plugin myinfo = 
 {
 	name = "SuperHero Mod CS:GO Hero - Super Sayian Gohan",
@@ -61,7 +59,7 @@ public void OnPluginStart()
 	
 	g_SSJGohanLevel = CreateConVar("superheromod_ssjgohan_level", "9");
 	g_SSJGohanDamageMultiplier = CreateConVar("superheromod_ssjgohan_damage_multiplier", "50", "Amount of times charge time damage (If charged 2 seconds, then damage will be 2 * this convar)");
-	g_SSJGohanRadius = CreateConVar("superheromod_ssjgohan_explosion_radius", "300", "Radius of the damage");
+	g_SSJGohanRadiusMultiplier = CreateConVar("superheromod_ssjgohan_explosion_radius_multiplier", "90", "Amount of radius of the kamehameha wave (Charge time * this convar value)");
 	g_SSJGohanCooldown = CreateConVar("superheromod_ssjgohan_cooldown", "30", "Seconds until next available kamehameha");
 	g_SSJGohanBeamSpeed = CreateConVar("superheromod_ssjgohan_speed", "1500", "Speed of the kamehameha");
 	g_SSJGohanMinChargeTime = CreateConVar("superheromod_ssjgohan_min_charge_time", "2", "Max amount of time in seconds you can charge the kamehameha");
@@ -72,6 +70,8 @@ public void OnPluginStart()
 	g_iHeroIndex = SuperHero_CreateHero("Super Saiyan Gohan", g_SSJGohanLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Guided Kamehameha", "Hold +POWER key down to charge, release to fire your Kamehameha!");
 	SuperHero_SetHeroBind(g_iHeroIndex);
+	
+	g_hHudCharge = CreateHudSynchronizer();
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)
@@ -171,10 +171,22 @@ public Action Timer_Charge(Handle timer, any data)
 	
 	if(g_fChargeTime[client] >= g_SSJGohanMaxChargeTime.FloatValue)
 	{
+		g_fChargeAmount[client] = g_fChargeTime[client];
 		Kamehameha(client);
 		g_hTimerCharge[client] = INVALID_HANDLE;
 		return Plugin_Stop;
 	}
+	
+	float percentage = (g_fChargeTime[client] / g_SSJGohanMaxChargeTime.FloatValue) * 100.0;
+	char strProgressBar[128];
+	for(int i = 0; i < percentage / 5; i++)
+			Format(strProgressBar, sizeof(strProgressBar), "%s█", strProgressBar);
+	if(percentage > 25.0)
+		SetHudTextParams(0.17, 0.04, 0.1, 0, 230, 230, 0, 0, 0.0, 0.0, 0.0);
+	else
+		SetHudTextParams(0.17, 0.04, 0.1, 255, 0, 0, 0, 0, 0.0, 0.0, 0.0);
+	ShowSyncHudText(client, g_hHudCharge, "%.0f%%\n%s", percentage, strProgressBar);
+	
 	g_fChargeTime[client] += 0.1;
 	return Plugin_Continue;
 }
@@ -341,7 +353,8 @@ public void EndKameBeam(int client, int entity)
 	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", entityPos);
 	//TE_SetupMuzzleFlash(entityPos, NULL_VECTOR, 20.0, 1);
 	float scale = g_fChargeAmount[client] * 0.4;
-	CS_CreateExplosion(client, g_SSJGohanDamageMultiplier.IntValue * RoundToNearest(g_fChargeAmount[client]), g_SSJGohanRadius.IntValue, entityPos);
+	int chargeAmount = RoundToNearest(g_fChargeAmount[client]);
+	CS_CreateExplosion(client, g_SSJGohanDamageMultiplier.IntValue * chargeAmount, g_SSJGohanRadiusMultiplier.IntValue * chargeAmount, entityPos);
 	TE_SetupGlowSprite(entityPos, g_iExplosion, 3.0, scale, 50);
 	TE_SendToAll();
 	AcceptEntityInput(entity, "Kill");
