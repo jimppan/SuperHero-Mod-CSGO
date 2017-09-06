@@ -1,0 +1,19 @@
+"Phrases"
+{
+	"Equip Knife"
+	{
+		"en"	"EQUIP KNIFE TO USE INSTANT TRANSMISSION"
+	}
+	
+	"No Players"
+	{
+		"#format"	"{1:s}"
+		"en"		"{1} Could not locate any power levels!"
+	}
+	
+	"No Valid Players"
+	{
+		"#format"	"{1:s}"
+		"en"	"{1} Your opponent is standing in a tight space!"
+	}
+}

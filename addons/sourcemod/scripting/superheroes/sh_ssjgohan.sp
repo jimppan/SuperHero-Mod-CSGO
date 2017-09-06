@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.03"
+#define PLUGIN_VERSION "1.04"
 
 #include <sourcemod>
 #include <sdktools>
@@ -26,6 +26,7 @@ ConVar g_SSJGohanCooldown;
 ConVar g_SSJGohanBeamSpeed;
 ConVar g_SSJGohanMinChargeTime;
 ConVar g_SSJGohanMaxChargeTime;
+ConVar g_SSJGohanParentPlayerWithBeam;
 
 float g_fChargeTime[MAXPLAYERS + 1];
 float g_fChargeAmount[MAXPLAYERS + 1];
@@ -33,6 +34,7 @@ int g_iTrail;
 int g_iExplosion;
 int g_iHeroIndex;
 int g_iBeam[MAXPLAYERS + 1] =  { INVALID_ENT_REFERENCE, ... };
+int g_iBeamHead[MAXPLAYERS + 1] =  { INVALID_ENT_REFERENCE, ... };
 bool g_bFiringBeam[MAXPLAYERS + 1];
 bool g_bCharging[MAXPLAYERS + 1];
 Handle g_hTimerCharge[MAXPLAYERS + 1] = { INVALID_HANDLE, ... };
@@ -61,8 +63,9 @@ public void OnPluginStart()
 	g_SSJGohanRadiusMultiplier = CreateConVar("superheromod_ssjgohan_explosion_radius_multiplier", "90", "Amount of radius of the kamehameha wave (Charge time * this convar value)");
 	g_SSJGohanCooldown = CreateConVar("superheromod_ssjgohan_cooldown", "30", "Seconds until next available kamehameha");
 	g_SSJGohanBeamSpeed = CreateConVar("superheromod_ssjgohan_speed", "1500", "Speed of the kamehameha");
-	g_SSJGohanMinChargeTime = CreateConVar("superheromod_ssjgohan_min_charge_time", "2", "Max amount of time in seconds you can charge the kamehameha");
+	g_SSJGohanMinChargeTime = CreateConVar("superheromod_ssjgohan_min_charge_time", "2", "Min amount of time in seconds you can charge the kamehameha");
 	g_SSJGohanMaxChargeTime = CreateConVar("superheromod_ssjgohan_max_charge_time", "8", "Max amount of time in seconds you can charge the kamehameha");
+	g_SSJGohanParentPlayerWithBeam = CreateConVar("superheromod_ssjgohan_parent_player_with_beam", "1", "Should the player fly with the beam if only the player gets hit and not world?");
 	
 	AutoExecConfig(true, "ssjgohan", "sourcemod/superheromod");
 	
@@ -223,6 +226,7 @@ stock void CreateKameBeam(int client)
 	SetEntPropEnt(prop, Prop_Data, "m_hOwnerEntity", client);
 	SetEntProp(prop, Prop_Send, "m_fEffects", 32); //EF_NODRAW
 	int ent = CreateEntityByName("env_sprite_oriented");
+	g_iBeamHead[client] = EntIndexToEntRef(ent);
 	DispatchKeyValue(ent, "spawnflags", "1");
 	float fscale = g_fChargeAmount[client] * 0.3;
 	char scale[32];
@@ -255,6 +259,7 @@ public Action Timer_Beam(Handle timer, any data)
 		{
 			AcceptEntityInput(entity, "Kill");
 			g_iBeam[client] = INVALID_ENT_REFERENCE;
+			g_iBeamHead[client] = INVALID_ENT_REFERENCE;
 			g_hTimerCharge[client] = INVALID_HANDLE;
 			return Plugin_Stop;
 		}
@@ -298,9 +303,35 @@ public Action Timer_Beam(Handle timer, any data)
 		Handle ray = TR_TraceHullFilterEx(entityPos, entityPos, vecMins, vecMaxs, MASK_ALL, TraceFilterWorldPlayers, client);
 		if(TR_DidHit(ray))
 		{
-			EndKameBeam(client, entity);
-			g_hTimerCharge[client] = INVALID_HANDLE;
-			return Plugin_Stop;
+			if(g_SSJGohanParentPlayerWithBeam.BoolValue)
+			{
+				int playerhit = TR_GetEntityIndex(ray);
+				if(IsValidClient(playerhit) && GetClientTeam(playerhit) != GetClientTeam(client))
+				{
+					//Make the player fly with the beam, fuckin epic
+					int sprite = EntRefToEntIndex(g_iBeamHead[client]);
+					if(!IsValidClient(GetEntPropEnt(sprite, Prop_Data, "m_hMoveChild")))
+					{
+						SetEntityMoveType(playerhit, MOVETYPE_NONE);
+						SetVariantString("!activator");
+						AcceptEntityInput(playerhit, "SetParent", sprite);
+					}
+					
+					StripWeapons(playerhit, false);
+				}
+				else
+				{
+					EndKameBeam(client, entity);
+					g_hTimerCharge[client] = INVALID_HANDLE;
+					return Plugin_Stop;
+				}
+			}
+			else
+			{
+				EndKameBeam(client, entity);
+				g_hTimerCharge[client] = INVALID_HANDLE;
+				return Plugin_Stop;
+			}
 		}
 	}
 	else
@@ -310,6 +341,7 @@ public Action Timer_Beam(Handle timer, any data)
 		{
 			AcceptEntityInput(entity, "Kill");
 			g_iBeam[client] = INVALID_ENT_REFERENCE;
+			g_iBeamHead[client] = INVALID_ENT_REFERENCE;
 			g_hTimerCharge[client] = INVALID_HANDLE;
 		}
 		return Plugin_Stop;
@@ -348,6 +380,18 @@ public void EndKameBeam(int client, int entity)
 {
 	float entityPos[3];
 	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", entityPos);
+	int sprite = EntRefToEntIndex(g_iBeamHead[client]);
+	if(sprite != INVALID_ENT_REFERENCE)
+	{
+		int child = GetEntPropEnt(sprite, Prop_Data, "m_hMoveChild");
+		if(child > 0)
+		{
+			SetEntityMoveType(child, MOVETYPE_WALK);
+			AcceptEntityInput(child, "ClearParent");
+			TeleportEntity(child, entityPos, NULL_VECTOR, NULL_VECTOR);
+		}
+	}
+	
 	//TE_SetupMuzzleFlash(entityPos, NULL_VECTOR, 20.0, 1);
 	float scale = g_fChargeAmount[client] * 0.4;
 	int chargeAmount = RoundToNearest(g_fChargeAmount[client]);
@@ -356,6 +400,7 @@ public void EndKameBeam(int client, int entity)
 	TE_SendToAll();
 	AcceptEntityInput(entity, "Kill");
 	g_iBeam[client] = INVALID_ENT_REFERENCE;
+	g_iBeamHead[client] = INVALID_ENT_REFERENCE;
 	g_bCharging[client] = false;
 	g_bFiringBeam[client] = false;
 }

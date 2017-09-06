@@ -23,7 +23,7 @@
 #define SH_SUPERPOWER_SIZE 32
 
 // The max string length of a hero help dscription
-#define SH_HELP_SIZE 64
+#define SH_HELP_SIZE 128
 
 // InitializeHero(id, heroID, mode) modes
 #define SH_HERO_DROP 0	//Hero is dropped
@@ -462,6 +462,16 @@ stock int clamp(int value, int min, int max)
 	if(value < min)
 		return min;
 		
+	return value;
+}
+
+stock float floatclamp(float value, float minf, float maxf)
+{
+	if(value > maxf)
+		return maxf;
+	if(value < minf)
+		return minf;
+	
 	return value;
 }
 
