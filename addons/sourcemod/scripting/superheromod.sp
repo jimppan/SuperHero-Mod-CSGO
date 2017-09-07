@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.05"
+#define PLUGIN_VERSION "1.07"
 
 #include <sourcemod>
 #include <sdktools>
@@ -48,7 +48,8 @@ int g_iPlayerFlags[MAXPLAYERS + 1]; 													//gPlayerFlags
 int g_iPlayerGodTimer[MAXPLAYERS + 1];													//gPlayerGodTimer
 float g_fPlayerStunSpeed[MAXPLAYERS + 1];												//gPlayerStunSpeed
 float g_fPlayerCooldownEndTime[MAXPLAYERS + 1][SH_MAXHEROES + 1];						//For timer hud stuff in PowerKeyDown func
-
+float g_fGravity[MAXPLAYERS + 1];														//Used to fix ladder gravity
+MoveType g_MoveType[MAXPLAYERS + 1];													//Used to fix ladder gravity
 //Hero variables
 int g_iHeroMaxHealth[SH_MAXHEROES];														//gHeroMaxHealth
 int g_iHeroMaxArmor[SH_MAXHEROES];														//gHeroMaxArmor
@@ -1604,6 +1605,39 @@ public void OnClientDisconnect(int client)
 	if(ent != INVALID_ENT_REFERENCE)
 		AcceptEntityInput(ent, "Kill");
 	g_iGlowEntities[client] = INVALID_ENT_REFERENCE;
+}
+
+public void OnGameFrame()
+{
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if(IsClientInGame(i) && IsPlayerAlive(i))
+		{
+			float fGravity = GetEntityGravity(i);
+			MoveType movetype = GetEntityMoveType(i);
+			if(GetEntityMoveType(i) == MOVETYPE_LADDER)
+			{
+				if(fGravity != 0.0)
+				{
+					g_fGravity[i] = fGravity;
+				}
+			}
+			else
+			{
+				if(g_MoveType[i] == MOVETYPE_LADDER)
+				{
+					SetEntityGravity(i, g_fGravity[i]);
+				}
+				g_fGravity[i] = fGravity;
+			}
+			g_MoveType[i] = movetype;
+		}
+		else
+		{
+			g_fGravity[i] = 1.0;
+			g_MoveType[i] = MOVETYPE_WALK;
+		}
+	}
 }
 
 public void OnMapStart()
