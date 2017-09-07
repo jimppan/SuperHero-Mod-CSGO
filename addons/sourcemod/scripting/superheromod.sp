@@ -1599,10 +1599,7 @@ public void OnClientPostAdminCheck(int client)
 public void OnClientDisconnect(int client)
 {
 	if(IsClientInGame(client) && !IsFakeClient(client))
-	{
 		WriteData(client);
-		PrintToChatAll("DATA WRITTEN!!!");
-	}
 		
 	int ent = EntRefToEntIndex(g_iGlowEntities[client]);
 	if(ent != INVALID_ENT_REFERENCE)
