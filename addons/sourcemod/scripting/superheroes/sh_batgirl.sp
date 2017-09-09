@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.04"
+#define PLUGIN_VERSION "1.05"
 
 #include <sourcemod>
 #include <sdktools>
@@ -149,12 +149,12 @@ stock void BatgirlCheapReel(int client)
 	GetClientAbsOrigin(client, user_origin);
 
 	float distance = GetVectorDistance(g_vecHookPos[client], user_origin);
-
+	float laggedspeed = GetEntPropFloat(client, Prop_Data, "m_flLaggedMovementValue");
 	if ( distance > 60 ) {
 		float inverseTime = g_BatgirlReelSpeed.FloatValue / distance;
-		velocity[0] = (g_vecHookPos[client][0] - user_origin[0]) * inverseTime;
-		velocity[1] = (g_vecHookPos[client][1] - user_origin[1]) * inverseTime;
-		velocity[2] = (g_vecHookPos[client][2] - user_origin[2]) * inverseTime;
+		velocity[0] = ((g_vecHookPos[client][0] - user_origin[0]) * inverseTime) / laggedspeed;
+		velocity[1] = ((g_vecHookPos[client][1] - user_origin[1]) * inverseTime) / laggedspeed;
+		velocity[2] = ((g_vecHookPos[client][2] - user_origin[2]) * inverseTime) / laggedspeed;
 	}
 
 	TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);

@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -13,6 +13,7 @@
 EngineVersion g_Game;
 
 ConVar g_PunisherLevel;
+ConVar g_PunisherEnableZeus;
 
 int g_iHeroIndex;
 bool g_bHasPunisher[MAXPLAYERS + 1];
@@ -34,6 +35,7 @@ public void OnPluginStart()
 		SetFailState("This plugin is for CSGO only.");	
 	}
 	g_PunisherLevel = CreateConVar("superheromod_punisher_level", "0");
+	g_PunisherEnableZeus = CreateConVar("superheromod_punisher_enable_zeus", "0", "Should infinite ammo be applied to zeus?");
 	AutoExecConfig(true, "punisher", "sourcemod/superheromod");
 	
 	g_iHeroIndex = SuperHero_CreateHero("Punisher", g_PunisherLevel.IntValue);
@@ -63,9 +65,17 @@ public Action Event_WeaponFire(Event event, const char[] name, bool dontBroadcas
 		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		if(weapon != INVALID_ENT_REFERENCE)
 		{
+			if(!g_PunisherEnableZeus.BoolValue)
+			{
+				char szClassName[32];
+				GetEntityClassname(weapon, szClassName, sizeof(szClassName));
+				if(StrContains(szClassName, "zeus") != -1)
+					return Plugin_Continue;
+			}
 			SetEntProp(weapon, Prop_Send, "m_iClip1", 30);
 		}
 	}
+	return Plugin_Continue;
 }
 
 public bool OnClientConnect(int client, char[]rejectmsg, int maxlen)

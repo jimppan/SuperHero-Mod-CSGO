@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.02"
+#define PLUGIN_VERSION "1.03"
 
 #include <sourcemod>
 #include <sdktools>
@@ -50,8 +50,8 @@ public void OnPluginStart()
 	}
 	
 	g_SpidermanLevel = CreateConVar("superheromod_spiderman_level", "0");
-	g_SpidermanMoveAcceleration = CreateConVar("superheromod_spiderman_move_acceleration", "140", "How quickly he can move while on the hook");
-	g_SpidermanReelSpeed = CreateConVar("superheromod_spiderman_reel_speed", "400", "How fast hook line reels in");
+	g_SpidermanMoveAcceleration = CreateConVar("superheromod_spiderman_move_acceleration", "1", "How quickly he can move while on the hook");
+	g_SpidermanReelSpeed = CreateConVar("superheromod_spiderman_reel_speed", "100", "How fast hook line reels in");
 	g_SpidermanHookStyle = CreateConVar("superheromod_spiderman_hook_style", "2", "1=spacedude, 2=spacedude auto reel (spiderman)");
 	g_SpidermanTeamColored = CreateConVar("superheromod_spiderman_team_colored", "1", "1=teamcolored web lines 0=white web lines");
 	g_SpidermanMaxHooks = CreateConVar("superheromod_spiderman_max_hooks", "-1", "Max ammout of hooks allowed (-1 is an unlimited ammount)");
@@ -229,7 +229,8 @@ stock void SpidermanPhysics(int client, bool autoReel)
 	float distD = GetVectorDistance(NULL_VECTOR, D);
 	if ( distD > 10 ) 
 	{
-		float acceleration = ((-GetConVarFloat(FindConVar("sv_gravity"))) * D[2] / distD) * HOOK_REFRESH_TIME;
+		float laggedspeed = GetEntPropFloat(client, Prop_Data, "m_flLaggedMovementValue");
+		float acceleration = (((-GetConVarFloat(FindConVar("sv_gravity"))) * D[2] / distD) * HOOK_REFRESH_TIME) / laggedspeed;
 		velocity[0] += (acceleration * D[0]) / distD;
 		velocity[1] += (acceleration * D[1]) / distD;
 		velocity[2] += (acceleration * D[2]) / distD;
@@ -237,9 +238,9 @@ stock void SpidermanPhysics(int client, bool autoReel)
 
 	float difference = DvTowards_A - vTowards_A;
 
-	velocity[0] += (difference * A[0]) / distA;
-	velocity[1] += (difference * A[1]) / distA;
-	velocity[2] += (difference * A[2]) / distA;
+	velocity[0] += ((difference * A[0]) / distA);
+	velocity[1] += ((difference * A[1]) / distA);
+	velocity[2] += ((difference * A[2]) / distA);
 	
 	TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velocity);
 }

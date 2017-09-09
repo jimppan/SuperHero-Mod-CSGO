@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.08"
+#define PLUGIN_VERSION "1.09"
 
 #include <sourcemod>
 #include <sdktools>
@@ -48,6 +48,7 @@ int g_iPlayerFlags[MAXPLAYERS + 1]; 													//gPlayerFlags
 int g_iPlayerGodTimer[MAXPLAYERS + 1];													//gPlayerGodTimer
 float g_fPlayerStunSpeed[MAXPLAYERS + 1];												//gPlayerStunSpeed
 float g_fPlayerCooldownEndTime[MAXPLAYERS + 1][SH_MAXHEROES + 1];						//For timer hud stuff in PowerKeyDown func
+float g_fPlayerGlobalActiveCooldown[MAXPLAYERS + 1];
 float g_fGravity[MAXPLAYERS + 1];														//Used to fix ladder gravity
 MoveType g_MoveType[MAXPLAYERS + 1];													//Used to fix ladder gravity
 //Hero variables
@@ -77,6 +78,9 @@ ConVar g_MaxBinds;
 ConVar g_DropAlive;
 ConVar g_HeadshotMultiplier;
 ConVar g_StartExperience;
+ConVar g_GiveExperienceOnPlant;
+ConVar g_GiveExperienceOnDefuse;
+ConVar g_GlobalBindCooldown;
 
 //Forwards
 Handle g_hOnHeroInitialized;
@@ -90,7 +94,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.08",
+	name = "SuperHero Mod CS:GO v1.09",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -116,6 +120,8 @@ public void OnPluginStart()
 	HookEvent("player_death",			Event_PlayerDeath, EventHookMode_Post);
 	HookEvent("round_prestart",			Event_RoundPreStart, EventHookMode_Pre);
 	HookEvent("round_freeze_end", 		Event_RoundFreezeEnd);
+	HookEvent("bomb_planted", 			Event_BombPlanted);
+	HookEvent("bomb_defused", 			Event_BombDefused);
 	
 	RegAdminCmd("sm_shsetxp", 			Command_SetExperience, ADMFLAG_BAN, "Allows admins to set a players XP to a specified amount");
 	RegAdminCmd("sm_shaddxp", 			Command_AddExperience, ADMFLAG_BAN, "Allows admins to give add XP to their current XP");
@@ -158,6 +164,9 @@ public void OnPluginStart()
 	g_DropAlive =						CreateConVar("superheromod_drop_alive", "0", "Drop power while alive");
 	g_HeadshotMultiplier = 				CreateConVar("superheromod_headshot_multiplier", "1.5", "Amount of times points you should get for killing with a headshot");
 	g_StartExperience = 				CreateConVar("superheromod_start_experience", "0", "Amount of experience new players should get on their first join");
+	g_GiveExperienceOnPlant = 			CreateConVar("superheromod_give_experience_on_plant", "1", "Should players get experience when they plant the bomb?");
+	g_GiveExperienceOnDefuse = 			CreateConVar("superheromod_give_experience_on_defuse", "1", "Should players get experience when defusing a bomb?");
+	g_GlobalBindCooldown = 				CreateConVar("superheromod_global_bind_cooldown", "0.5", "Amount of seconds until the player can press another power key");
 	
 	g_hOnHeroInitialized =				CreateGlobalForward("SuperHero_OnHeroInitialized", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 	g_hOnPlayerSpawned = 				CreateGlobalForward("SuperHero_OnPlayerSpawned", ET_Ignore, Param_Cell, Param_Cell);
@@ -917,6 +926,29 @@ public Action Event_PlayerSpawn(Event event, const char[] name, bool dontBroadca
 	return Plugin_Continue;
 }
 
+
+public Action Event_BombPlanted(Event event, const char[] name, bool dontBroadcast)
+{
+	if(!g_GiveExperienceOnPlant.BoolValue)
+		return Plugin_Continue;
+		
+	int client = GetClientOfUserId(event.GetInt("userid"));	
+	LocalAddExperience(client, g_iGivenExperience[g_iPlayerLevel[client]]);
+	
+	return Plugin_Continue;
+}
+
+public Action Event_BombDefused(Event event, const char[] name, bool dontBroadcast)
+{
+	if(!g_GiveExperienceOnDefuse.BoolValue)
+		return Plugin_Continue;
+		
+	int client = GetClientOfUserId(event.GetInt("userid"));	
+	LocalAddExperience(client, g_iGivenExperience[g_iPlayerLevel[client]]);
+	
+	return Plugin_Continue;
+}
+
 public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));	
@@ -1004,14 +1036,20 @@ public Action PowerKeyDown(int client, int args)
 	//Make sure they are not already using this keydown
 	if (g_bPowerDown[client][key]) 
 		return Plugin_Handled;
-		
+	
+	if(g_fPlayerGlobalActiveCooldown[client] > GetGameTime())
+	{
+		EmitSoundToClientAny(client, DENY_SOUND);
+		return Plugin_Handled;
+	}		
+	
 	if(g_bPlayerInCooldown[client][heroIndex])
 	{
 		SetHudTextParams(0.35, 0.80, 1.0, 255, 255, 0, 255);
 		ShowSyncHudText(client, g_hHelpCooldownSync, "%t", "Hero Cooldown", g_hHeroes[heroIndex][szHero], RoundToNearest(g_fPlayerCooldownEndTime[client][heroIndex] - GetGameTime()));
 	}
 	g_bPowerDown[client][key] = true;
-
+	g_fPlayerGlobalActiveCooldown[client] = GetGameTime() + g_GlobalBindCooldown.FloatValue;
 	if(PlayerHasPower(client, heroIndex))
 	{
 		Call_StartForward(g_hOnHeroBind);
@@ -1062,17 +1100,14 @@ public Action PowerKeyUp(int client, int args)
 
 public Action Command_HeroList(int client, int args)
 {
-	char szBuffer[64];
-	
-	Menu menu = new Menu(NullMenuHandler);
-	menu.SetTitle("Hero List");
+	PrintToChat(client, "%t", "See Console", SH_PREFIX);
+	char szBuffer[128];
+	PrintToConsole(client, "--------------------------------------HERO LIST--------------------------------------");
 	for (int i = 0; i < g_iHeroCount; i++)
 	{
-		Format(szBuffer, sizeof(szBuffer), "%s (%d%s) - %s", g_hHeroes[i][szHero], g_hHeroes[i][availableLevel], (g_hHeroes[i][requiresBind] ? " +Bind" : ""), g_hHeroes[i][szSuperPower]);
-		menu.AddItem("", szBuffer, ITEMDRAW_DISABLED);
+		Format(szBuffer, sizeof(szBuffer), "%s (%d%s) - (%s) (%s)", g_hHeroes[i][szHero], g_hHeroes[i][availableLevel], (g_hHeroes[i][requiresBind] ? " +Bind" : ""), g_hHeroes[i][szSuperPower], g_hHeroes[i][szHelp]);
+		PrintToConsole(client, szBuffer);
 	}
-	menu.ExitButton = true;
-	menu.Display(client, MENU_TIME_FOREVER);
 	return Plugin_Handled;
 }
 
@@ -1189,8 +1224,25 @@ public Action Command_Heroes(int client, int args)
 
 public Action Command_Help(int client, int args)
 {
-	for (int i = 0; i < SH_MAXLEVELS; i++)
-		PrintToServer("%d", g_iLevelExperience[i]);
+	PrintToChat(client, "%t", "See Console", SH_PREFIX);
+	PrintToConsole(client, "--------------------------------------COMMANDS--------------------------------------");
+	PrintToConsole(client, "sm_help - Outputs all commands in console");
+	PrintToConsole(client, "sm_superherohelp - Outputs all commands in console");
+	PrintToConsole(client, "sm_herolist - Shows the list of available heros");
+	PrintToConsole(client, "sm_playerskills - Shows every player's superhero info");
+	PrintToConsole(client, "sm_playerpowers - Shows every player's superhero info");
+	PrintToConsole(client, "sm_playerheroes - Shows every player's superhero info");
+	PrintToConsole(client, "sm_playerinfo - Shows every player's superhero info");
+	PrintToConsole(client, "sm_myheroes - Shows the heros you have already chosen and the binds that you have already made");
+	PrintToConsole(client, "sm_clearheroes - Is used to erase all your heroes (in case you want to chose other heroes)");
+	PrintToConsole(client, "sm_clearpowers - Is used to erase all your heroes (in case you want to chose other heroes)");
+	PrintToConsole(client, "sm_clearskills - Is used to erase all your heroes (in case you want to chose other heroes)");
+	PrintToConsole(client, "sm_showmenu - Shows you the powers menu in case you can chose heroes");
+	PrintToConsole(client, "sm_heroes - Shows you the powers menu in case you can chose heroes");
+	PrintToConsole(client, "sm_heromenu - Shows you the powers menu in case you can chose heroes");
+	PrintToConsole(client, "sm_drophero - Is used to remove a hero from your hero list in case you want another");
+	PrintToConsole(client, "sm_drop - Is used to remove a hero from your hero list in case you want another");
+	PrintToConsole(client, "sm_whohas - Shows you who has the named heroes in the current game");
 }
 
 public Action Command_SetLevel(int client, int args)
@@ -2576,7 +2628,7 @@ stock void DropPower(int client, const char[] hero)
 		heroIndex = g_iPlayerPowers[client][i];
 		if (-1 < heroIndex < g_iHeroCount) 
 		{
-			if (StrContains(hero, g_hHeroes[heroIndex][szHero], false) != -1) 
+			if (StrContains(g_hHeroes[heroIndex][szHero], hero, false) != -1) 
 			{
 				ClearPower(client, i);
 				PrintToChat(client, "%t", "Dropped Hero", SH_PREFIX, g_hHeroes[heroIndex][szHero]);

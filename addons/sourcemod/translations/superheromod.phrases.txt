@@ -104,4 +104,10 @@
 		"#format"		"{1:s},{2:d}"
 		"en"			"{1} Cooldown: {2}"
 	}
+	
+	"See Console"
+	{
+		"#format"		"{1:s}"
+		"en"			"{1} See console for output!"
+	}
 }
