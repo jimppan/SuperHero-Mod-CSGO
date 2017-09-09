@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.10"
+#define PLUGIN_VERSION "1.11"
 
 #include <sourcemod>
 #include <sdktools>
@@ -94,7 +94,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.10",
+	name = "SuperHero Mod CS:GO v1.11",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -1049,9 +1049,9 @@ public Action PowerKeyDown(int client, int args)
 		ShowSyncHudText(client, g_hHelpCooldownSync, "%t", "Hero Cooldown", g_hHeroes[heroIndex][szHero], RoundToNearest(g_fPlayerCooldownEndTime[client][heroIndex] - GetGameTime()));
 	}
 	g_bPowerDown[client][key] = true;
-	g_fPlayerGlobalActiveCooldown[client] = GetGameTime() + g_GlobalBindCooldown.FloatValue;
 	if(PlayerHasPower(client, heroIndex))
 	{
+		g_fPlayerGlobalActiveCooldown[client] = GetGameTime() + g_GlobalBindCooldown.FloatValue;
 		Call_StartForward(g_hOnHeroBind);
 		Call_PushCell(client);
 		Call_PushCell(heroIndex);
@@ -1633,14 +1633,10 @@ public int HeroMenuHandler(Menu menu, MenuAction action, int param1, int param2)
 //////////////
 // FORWARDS //
 //////////////
-public bool OnClientConnect(int client, char[] rejectmsg, int maxlen)
-{
-	InitializePlayer(client);
-	return true;
-}
-
 public void OnClientPutInServer(int client)
 {
+	InitializePlayer(client);
+	
 	SDKHook(client, SDKHook_OnTakeDamage, OnPlayerTakeDamage);
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnPlayerSwitchWeapon);
 }
