@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.02"
+#define PLUGIN_VERSION "1.03"
 
 #include <sourcemod>
 #include <sdktools>
@@ -49,8 +49,8 @@ public void OnPluginStart()
 	
 	g_BatgirlLevel = CreateConVar("superheromod_batgirl_level", "9");
 	g_BatgirlReelSpeed = CreateConVar("superheromod_batgirl_reel_speed", "1000", "How fast hook line reels in");
-	g_BatgirlTeamColored = CreateConVar("superheromod_spiderman_team_colored", "1", "1=teamcolored web lines 0=white web lines");
-	g_BatgirlMaxHooks = CreateConVar("superheromod_spiderman_max_hooks", "-1", "Max ammout of hooks allowed (-1 is an unlimited ammount)");
+	g_BatgirlTeamColored = CreateConVar("superheromod_batgirl_team_colored", "1", "1=teamcolored web lines 0=white web lines");
+	g_BatgirlMaxHooks = CreateConVar("superheromod_batgirl_max_hooks", "-1", "Max ammout of hooks allowed (-1 is an unlimited ammount)");
 	AutoExecConfig(true, "batgirl", "sourcemod/superheromod");
 	
 	g_iHeroIndex = SuperHero_CreateHero("Batgirl", g_BatgirlLevel.IntValue);
