@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -60,6 +60,11 @@ public void OnPluginStart()
 	g_iHeroIndex = SuperHero_CreateHero("Spiderman", g_SpidermanLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Web Swing", "Shoot web to swing - Jump reels in, Duck reels out");
 	SuperHero_SetHeroBind(g_iHeroIndex);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_SpidermanLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

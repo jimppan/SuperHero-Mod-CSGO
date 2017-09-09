@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -44,6 +44,11 @@ public void OnPluginStart()
 	
 	g_hSyncMyDamage = CreateHudSynchronizer();
 	g_hSyncEnemyDamage = CreateHudSynchronizer();
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_AnubisLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

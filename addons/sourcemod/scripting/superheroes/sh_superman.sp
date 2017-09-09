@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -16,7 +16,7 @@ ConVar g_SupermanLevel;
 ConVar g_SupermanHealth;
 ConVar g_SupermanArmor;
 ConVar g_SupermanGravity;
-
+int g_iHeroIndex;
 public Plugin myinfo = 
 {
 	name = "SuperHero Mod CS:GO Hero - Superman",
@@ -39,9 +39,14 @@ public void OnPluginStart()
 	g_SupermanGravity = CreateConVar("superheromod_superman_gravity", "0.35");
 	AutoExecConfig(true, "superman", "sourcemod/superheromod");
 	
-	int heroIndex = SuperHero_CreateHero("Superman", g_SupermanLevel.IntValue);
-	SuperHero_SetHeroInfo(heroIndex, "Health/Armor/Gravity", "More health, Free armor, Reduced gravity");
-	SuperHero_SetHeroHealth(heroIndex, g_SupermanHealth.IntValue);
-	SuperHero_SetHeroArmor(heroIndex, g_SupermanArmor.IntValue);
-	SuperHero_SetHeroGravity(heroIndex, g_SupermanGravity.FloatValue);
+	g_iHeroIndex = SuperHero_CreateHero("Superman", g_SupermanLevel.IntValue);
+	SuperHero_SetHeroInfo(g_iHeroIndex, "Health/Armor/Gravity", "More health, Free armor, Reduced gravity");
+	SuperHero_SetHeroHealth(g_iHeroIndex, g_SupermanHealth.IntValue);
+	SuperHero_SetHeroArmor(g_iHeroIndex, g_SupermanArmor.IntValue);
+	SuperHero_SetHeroGravity(g_iHeroIndex, g_SupermanGravity.FloatValue);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_SupermanLevel.IntValue);
 }

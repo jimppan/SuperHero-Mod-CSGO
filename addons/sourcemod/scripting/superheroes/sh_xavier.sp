@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -47,6 +47,11 @@ public void OnPluginStart()
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Team Detection", "Detect what team a player is on by glowing trail");
 	
 	CreateTimer(TRAIL_REFRESH_RATE, Timer_Trail,_, TIMER_REPEAT);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_XavierLevel.IntValue);
 }
 
 public Action Timer_Trail(Handle timer, any data)

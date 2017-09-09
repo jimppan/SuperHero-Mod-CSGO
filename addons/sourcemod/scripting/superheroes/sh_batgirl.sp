@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.03"
+#define PLUGIN_VERSION "1.04"
 
 #include <sourcemod>
 #include <sdktools>
@@ -56,6 +56,11 @@ public void OnPluginStart()
 	g_iHeroIndex = SuperHero_CreateHero("Batgirl", g_BatgirlLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Grappling Hook", "You now have the Bat-Grapple hook. Zipline to aim");
 	SuperHero_SetHeroBind(g_iHeroIndex);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_BatgirlLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

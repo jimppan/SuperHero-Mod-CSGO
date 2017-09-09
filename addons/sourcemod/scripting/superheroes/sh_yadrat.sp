@@ -3,7 +3,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -50,6 +50,11 @@ public void OnPluginStart()
 	g_iHeroIndex = SuperHero_CreateHero("Yadrat", g_YadratLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Instant Transmission", "Press +POWER key to teleport to your nearest target \n(If he is above level 0)");
 	SuperHero_SetHeroBind(g_iHeroIndex);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_YadratLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

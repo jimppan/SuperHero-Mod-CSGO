@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -43,6 +43,11 @@ public void OnPluginStart()
 	
 	g_iHeroIndex = SuperHero_CreateHero("Dracula", g_DraculaLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Vampiric Drain", "Gain HP by attacking players - More HP per level");
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_DraculaLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

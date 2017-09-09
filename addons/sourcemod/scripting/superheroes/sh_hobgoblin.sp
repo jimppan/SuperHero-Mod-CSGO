@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -46,6 +46,11 @@ public void OnPluginStart()
 	g_iHeroIndex = SuperHero_CreateHero("Hobgoblin", g_HobgoblinLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Hobgoblin Grenades", "Extra nade damage/Refill nade");
 	SuperHero_SetHeroDamageMultiplier(g_iHeroIndex, g_HobgoblinDamageMultiplier.FloatValue, view_as<int>(CSGOWeaponID_HEGRENADE));
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_HobgoblinLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -48,6 +48,11 @@ public void OnPluginStart()
 	
 	g_iHeroIndex = SuperHero_CreateHero("Grandmaster", g_GrandmasterLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Revive Dead", "Revive a dead teammate after they die");
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_GrandmasterLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

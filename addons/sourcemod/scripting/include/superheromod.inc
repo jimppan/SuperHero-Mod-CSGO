@@ -343,6 +343,11 @@ native bool SuperHero_HeroHasPlayerModel(int heroindex);
 // Extra info: Model is automatically set from superheromod.sp on Event_PlayerSpawn aslong as SuperHero_SetHeroPlayerModel is called on your superhero
 native int SuperHero_GetHighestPlayerModelLevel(int client, char[] szbuffer, int maxlen);
 
+// Sets the heros available level (Use this in OnConfigsExecuted forward since AutoExecConfig requires more than 1 frame to execute)
+// param1: heroindex to set level on
+// param2: the level to set
+native void SuperHero_SetHeroAvailableLevel(int heroIndex, int level);
+
 //FORWARDS
 
 // This is called when a players hero is initialized (e.g playerspawn or when player picks a new hero). Its used to set info like if the player has this hero and what not

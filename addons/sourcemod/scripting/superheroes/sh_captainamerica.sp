@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -52,6 +52,7 @@ public void OnPluginStart()
 
 public void OnConfigsExecuted()
 {
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_CaptainamericaLevel.IntValue);
 	g_fMaxLevelFactor = (10.0 / SuperHero_GetLevelCount()) * 100.0;
 }
 

@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.07"
+#define PLUGIN_VERSION "1.08"
 
 #include <sourcemod>
 #include <sdktools>
@@ -90,7 +90,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.07",
+	name = "SuperHero Mod CS:GO v1.08",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -240,6 +240,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int err_
 	CreateNative("SuperHero_GetHeroPlayerModel", Native_GetHeroPlayerModel);
 	CreateNative("SuperHero_HeroHasPlayerModel", Native_HeroHasPlayerModel);
 	CreateNative("SuperHero_GetHighestPlayerModelLevel", Native_GetHighestPlayerModelLevel);
+	CreateNative("SuperHero_SetHeroAvailableLevel", Native_SetHeroAvailableLevel);
 	
 	RegPluginLibrary("superheromod");
 
@@ -853,6 +854,13 @@ public int Native_GetHighestPlayerModelLevel(Handle plugin, int numParams)
 	int maxlen = GetNativeCell(3);
 	SetNativeString(2, szBuffer, maxlen);
 	return heroindex;
+}
+
+public int Native_SetHeroAvailableLevel(Handle plugin, int numParams)
+{
+	int heroIndex = GetNativeCell(1);
+	int level = GetNativeCell(2);
+	g_hHeroes[heroIndex][availableLevel] = level;
 }
 
 //////////////
@@ -1581,11 +1589,6 @@ public bool OnClientConnect(int client, char[] rejectmsg, int maxlen)
 
 public void OnClientPutInServer(int client)
 {
-	//if(!IsFakeClient(client) && g_StartExperience.IntValue > 0)
-	//{
-		
-	//}
-	
 	SDKHook(client, SDKHook_OnTakeDamage, OnPlayerTakeDamage);
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnPlayerSwitchWeapon);
 }

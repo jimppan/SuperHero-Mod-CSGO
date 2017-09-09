@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -40,6 +40,11 @@ public void OnPluginStart()
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Unlimited Ammo", "Endless Bullets. No Reload! Keep Shooting");
 	
 	HookEvent("weapon_fire", Event_WeaponFire, EventHookMode_Post);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_PunisherLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

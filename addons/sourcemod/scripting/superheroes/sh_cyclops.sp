@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -57,6 +57,11 @@ public void OnPluginStart()
 	g_iHeroIndex = SuperHero_CreateHero("Cyclops", g_CyclopsLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Optic Blast", "Press the +power key to fire your optic laser beam");
 	SuperHero_SetHeroBind(g_iHeroIndex);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_CyclopsLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

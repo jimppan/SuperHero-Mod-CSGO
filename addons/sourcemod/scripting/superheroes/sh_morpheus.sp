@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -43,9 +43,14 @@ public void OnPluginStart()
 	HookEvent("weapon_fire", Event_WeaponFire, EventHookMode_Post);
 	
 	g_iHeroIndex = SuperHero_CreateHero("Morpheus", g_MorpheusLevel.IntValue);
-	SuperHero_SetHeroInfo(g_iHeroIndex, "Dual MP5's", "Lower Gravity/Dual MP5's/Unlimited Ammo");
+	SuperHero_SetHeroInfo(g_iHeroIndex, "Dual MP7's", "Lower Gravity/Dual MP7's/Unlimited Ammo");
 	SuperHero_SetHeroPrimaryWeapon(g_iHeroIndex, view_as<int>(CSGOWeaponID_MP7));
 	SuperHero_SetHeroGravity(g_iHeroIndex, g_MorpheusGravity.FloatValue);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_MorpheusLevel.IntValue);
 }
 
 public Action Event_WeaponFire(Event event, const char[] name, bool dontBroadcast)

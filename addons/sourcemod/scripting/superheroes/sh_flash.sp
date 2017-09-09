@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -14,7 +14,7 @@ EngineVersion g_Game;
 
 ConVar g_FlashLevel;
 ConVar g_FlashSpeed;
-
+int g_iHeroIndex;
 public Plugin myinfo = 
 {
 	name = "SuperHero Mod CS:GO Hero - Flash",
@@ -35,7 +35,12 @@ public void OnPluginStart()
 	g_FlashSpeed = CreateConVar("superheromod_flash_speed", "2.0");
 	AutoExecConfig(true, "flash", "sourcemod/superheromod");
 	
-	int heroIndex = SuperHero_CreateHero("Flash", g_FlashLevel.IntValue);
-	SuperHero_SetHeroInfo(heroIndex, "Super Speed", "You will run much faster with this hero");
-	SuperHero_SetHeroSpeed(heroIndex, g_FlashSpeed.FloatValue);
+	g_iHeroIndex = SuperHero_CreateHero("Flash", g_FlashLevel.IntValue);
+	SuperHero_SetHeroInfo(g_iHeroIndex, "Super Speed", "You will run much faster with this hero");
+	SuperHero_SetHeroSpeed(g_iHeroIndex, g_FlashSpeed.FloatValue);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_FlashLevel.IntValue);
 }

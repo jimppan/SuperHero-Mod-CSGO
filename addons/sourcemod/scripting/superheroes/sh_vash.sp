@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -43,6 +43,11 @@ public void OnPluginStart()
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Revolver & Evasion", "Deagle does more damage, evade by removing random hitzones");
 	SuperHero_SetHeroSecondaryWeapon(g_iHeroIndex, view_as<int>(CSGOWeaponID_DEAGLE));
 	SuperHero_SetHeroDamageMultiplier(g_iHeroIndex, g_VashDamageMultiplier.FloatValue, view_as<int>(CSGOWeaponID_DEAGLE));
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_VashLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)

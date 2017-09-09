@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -49,6 +49,11 @@ public void OnPluginStart()
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Radar Sense", "Rings show when other players are approaching");
 	
 	CreateTimer(BEACON_SPEED, Timer_Radar,_, TIMER_REPEAT);
+}
+
+public void OnConfigsExecuted()
+{
+	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_DaredevilLevel.IntValue);
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)
