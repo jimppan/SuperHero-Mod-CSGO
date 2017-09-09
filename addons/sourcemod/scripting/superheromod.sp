@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.09"
+#define PLUGIN_VERSION "1.10"
 
 #include <sourcemod>
 #include <sdktools>
@@ -94,7 +94,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.09",
+	name = "SuperHero Mod CS:GO v1.10",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -1982,6 +1982,7 @@ stock void InitializePlayer(int client)
 	g_iPlayerMaxArmor[client] = 0;
 	g_iPlayerArmor[client] = 0;
 	g_fPlayerStunSpeed[client] = 1.0;
+	g_fPlayerGlobalActiveCooldown[client] = 0.0;
 	for (int i = 0; i <= SH_MAXBINDPOWERS; i++)
 		g_bPowerDown[client][i] = false;
 		
