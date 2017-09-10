@@ -1,0 +1,8 @@
+"Phrases"
+{
+	"Respawned"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"		"{1} {2} You used the Phoenix power to rise again from the ashes"
+	}
+}
