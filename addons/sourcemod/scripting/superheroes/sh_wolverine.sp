@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -55,7 +55,11 @@ public void OnPluginStart()
 
 public void OnConfigsExecuted()
 {
+	int weapons[42];
+	weapons[0] = view_as<int>(CSGOWeaponID_KNIFE);
 	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_WolverineLevel.IntValue);
+	SuperHero_SetHeroSpeed(g_iHeroIndex, g_WolverineKnifeSpeed.FloatValue, weapons, 1);
+	SuperHero_SetHeroDamageMultiplier(g_iHeroIndex, g_WolverineDamageMultiplier.FloatValue, view_as<int>(CSGOWeaponID_KNIFE));
 }
 
 public Action Timer_Heal(Handle timer, any data)

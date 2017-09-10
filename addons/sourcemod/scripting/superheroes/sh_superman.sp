@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -49,4 +49,7 @@ public void OnPluginStart()
 public void OnConfigsExecuted()
 {
 	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_SupermanLevel.IntValue);
+	SuperHero_SetHeroHealth(g_iHeroIndex, g_SupermanHealth.IntValue);
+	SuperHero_SetHeroArmor(g_iHeroIndex, g_SupermanArmor.IntValue);
+	SuperHero_SetHeroGravity(g_iHeroIndex, g_SupermanGravity.FloatValue);
 }

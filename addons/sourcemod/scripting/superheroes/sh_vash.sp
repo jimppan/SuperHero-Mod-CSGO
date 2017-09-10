@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -48,6 +48,7 @@ public void OnPluginStart()
 public void OnConfigsExecuted()
 {
 	SuperHero_SetHeroAvailableLevel(g_iHeroIndex, g_VashLevel.IntValue);
+	SuperHero_SetHeroDamageMultiplier(g_iHeroIndex, g_VashDamageMultiplier.FloatValue, view_as<int>(CSGOWeaponID_DEAGLE));
 }
 
 public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)
