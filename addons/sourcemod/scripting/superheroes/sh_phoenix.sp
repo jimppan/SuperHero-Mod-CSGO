@@ -66,9 +66,6 @@ public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)
 
 public void SuperHero_OnPlayerSpawned(int client, bool newroundspawn)
 {
-	if(!IsGameLive())
-		return;
-		
 	if(g_bHasPhoenix[client])
 	{
 		if(!newroundspawn)
