@@ -3,7 +3,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -108,7 +108,8 @@ public void SuperHero_OnHeroBind(int client, int heroIndex, int key)
 			g_bInTransmission[client] = true;
 
 			g_vecWorldMaxs[2] += 200.0;
-			ScreenEffect(client, 300, 1300, 0, 0, 0, 0, 255);
+			//Appearently 433 milliseconds is 1 second in csgo hehehehehehe
+			ScreenEffect(client, 300, 433 * g_YadratTeleportTime.IntValue, 0, 0, 0, 0, 255);
 			SuperHero_SetPlayerHeroCooldown(client, g_iHeroIndex, g_YadratCooldown.FloatValue);
 			GetClientAbsOrigin(client, g_vecPreviousPos[client]);
 			EmitAmbientSoundAny(INSTANT_TRANSMISSION_SOUND, g_vecPreviousPos[client], client);
