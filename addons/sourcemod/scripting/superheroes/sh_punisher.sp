@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.02"
+#define PLUGIN_VERSION "1.03"
 
 #include <sourcemod>
 #include <sdktools>
@@ -69,7 +69,7 @@ public Action Event_WeaponFire(Event event, const char[] name, bool dontBroadcas
 			{
 				char szClassName[32];
 				GetEntityClassname(weapon, szClassName, sizeof(szClassName));
-				if(StrContains(szClassName, "zeus") != -1)
+				if(StrEqual(szClassName, "weapon_taser"))
 					return Plugin_Continue;
 			}
 			SetEntProp(weapon, Prop_Send, "m_iClip1", 30);
