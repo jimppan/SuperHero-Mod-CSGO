@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.02"
+#define PLUGIN_VERSION "1.03"
 
 #include <sourcemod>
 #include <sdktools>
@@ -61,6 +61,9 @@ public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)
 
 public void SuperHero_OnPlayerTakeDamagePost(int victim, int attacker, int damagetype, int weapon, int damagetaken, int armortaken)
 {
+	if(!IsValidClient(attacker))
+		return;
+		
 	if(GetClientTeam(victim) == GetClientTeam(attacker))
 		return;
 		

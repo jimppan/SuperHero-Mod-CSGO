@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.11"
+#define PLUGIN_VERSION "1.12"
 
 #include <sourcemod>
 #include <sdktools>
@@ -94,7 +94,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.11",
+	name = "SuperHero Mod CS:GO v1.12",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -1782,32 +1782,32 @@ public Action OnPlayerTakeDamage(int victim, int &attacker, int &inflictor, floa
 		damage = 0.0;
 		return Plugin_Changed;
 	}
-	
-	if(!IsValidClient(attacker))
-		return Plugin_Continue;
-		
+	bool isValidAttacker = IsValidClient(attacker);
 	char classname[32];
-	if(weapon > 1)
-		GetEntityClassname(weapon, classname, sizeof(classname));
-	else
+	if(isValidAttacker)
 	{
-		if(damagetype & DMG_BLAST || damagetype & DMG_BLAST_SURFACE)
-			Format(classname, sizeof(classname), "weapon_hegrenade");
-		else if(damagetype & DMG_BURN)
+		if(weapon > 1)
+			GetEntityClassname(weapon, classname, sizeof(classname));
+		else
 		{
-			if(GetClientTeam(attacker) == CS_TEAM_T)
-				Format(classname, sizeof(classname), "weapon_molotov");
-			else if(GetClientTeam(attacker) == CS_TEAM_CT)
-				Format(classname, sizeof(classname), "weapon_incgrenade");
-			else
-				Format(classname, sizeof(classname), "weapon_molotov");
+			if(damagetype & DMG_BLAST || damagetype & DMG_BLAST_SURFACE)
+				Format(classname, sizeof(classname), "weapon_hegrenade");
+			else if(damagetype & DMG_BURN)
+			{
+				if(GetClientTeam(attacker) == CS_TEAM_T)
+					Format(classname, sizeof(classname), "weapon_molotov");
+				else if(GetClientTeam(attacker) == CS_TEAM_CT)
+					Format(classname, sizeof(classname), "weapon_incgrenade");
+				else
+					Format(classname, sizeof(classname), "weapon_molotov");
+			}
 		}
 	}
 	
 	DataPack pack = CreateDataPack();
 	RequestFrame(OnPlayerTakeDamagePost, pack);
 	pack.WriteCell(GetClientUserId(victim));
-	pack.WriteCell(GetClientUserId(attacker));
+	pack.WriteCell((isValidAttacker ? GetClientUserId(attacker) : attacker));
 	pack.WriteCell(damagetype);
 	pack.WriteCell(((weapon < 1) ? -1 : EntIndexToEntRef(weapon)));
 	pack.WriteCell(GetEntProp(victim, Prop_Data, "m_iHealth"));
@@ -1815,11 +1815,11 @@ public Action OnPlayerTakeDamage(int victim, int &attacker, int &inflictor, floa
 	
 	int weaponid = view_as<int>(WeaponClassNameToCSWeaponID(classname));
 	
-	if(!weaponid)
-		return Plugin_Continue;
-	
-	float dmgmult = GetMaxDamageMultiplier(attacker, weaponid);
-	damage *= dmgmult;
+	if(isValidAttacker && weaponid > -1)
+	{
+		float dmgmult = GetMaxDamageMultiplier(attacker, weaponid);
+		damage *= dmgmult;
+	}
 	
 	Call_StartForward(g_hOnPlayerTakeDamage);
 	Call_PushCell(victim);
@@ -1845,10 +1845,8 @@ public void OnPlayerTakeDamagePost(DataPack pack)
 		
 	int damagetype = pack.ReadCell();
 	int ent = pack.ReadCell();
-	int weapon = INVALID_ENT_REFERENCE;
-	if(ent > 0)
-		weapon = EntRefToEntIndex(weapon);
-		
+	int weapon = EntRefToEntIndex(ent);
+
 	int oldHealth = pack.ReadCell();
 	int oldArmor = pack.ReadCell();
 	

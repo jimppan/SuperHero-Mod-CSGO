@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -62,7 +62,10 @@ public void SuperHero_OnPlayerTakeDamagePost(int victim, int attacker, int damag
 {
 	if(weapon < 1)
 		return;
-	
+
+	if(!IsValidClient(attacker))
+		return;
+
 	//Remove nade health drain
 	char szClassName[32];
 	if(StrContains(szClassName, "nade") != -1 || StrContains(szClassName, "molotov") != -1 || StrContains(szClassName, "flash") != -1)
