@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.03"
+#define PLUGIN_VERSION "1.04"
 
 #include <sourcemod>
 #include <sdktools>
@@ -31,6 +31,7 @@ int g_iHooksLeft[MAXPLAYERS + 1];
 int g_iHeroIndex;
 float g_fHookLength[MAXPLAYERS + 1];
 float g_vecHookPos[MAXPLAYERS + 1][3];
+Handle g_hTimerHook[MAXPLAYERS + 1] = { INVALID_HANDLE, ... };
 
 public Plugin myinfo = 
 {
@@ -50,8 +51,8 @@ public void OnPluginStart()
 	}
 	
 	g_SpidermanLevel = CreateConVar("superheromod_spiderman_level", "0");
-	g_SpidermanMoveAcceleration = CreateConVar("superheromod_spiderman_move_acceleration", "1", "How quickly he can move while on the hook");
-	g_SpidermanReelSpeed = CreateConVar("superheromod_spiderman_reel_speed", "100", "How fast hook line reels in");
+	g_SpidermanMoveAcceleration = CreateConVar("superheromod_spiderman_move_acceleration", "140", "How quickly he can move while on the hook");
+	g_SpidermanReelSpeed = CreateConVar("superheromod_spiderman_reel_speed", "400", "How fast hook line reels in");
 	g_SpidermanHookStyle = CreateConVar("superheromod_spiderman_hook_style", "2", "1=spacedude, 2=spacedude auto reel (spiderman)");
 	g_SpidermanTeamColored = CreateConVar("superheromod_spiderman_team_colored", "1", "1=teamcolored web lines 0=white web lines");
 	g_SpidermanMaxHooks = CreateConVar("superheromod_spiderman_max_hooks", "-1", "Max ammout of hooks allowed (-1 is an unlimited ammount)");
@@ -115,6 +116,7 @@ public void SuperHero_OnHeroBind(int client, int heroIndex, int key)
 			
 			SetVariantString("!activator");
 			AcceptEntityInput(EntRefToEntIndex(g_iHook[client]), "SetParent", client);
+			g_hTimerHook[client] = CreateTimer(HOOK_REFRESH_TIME, Timer_Hook, GetClientUserId(client), TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 			float pos[3];
 			GetClientEyePosition(client, pos);
 			EmitAmbientSoundAny(WEB_SOUND, pos);
@@ -127,20 +129,26 @@ public void SuperHero_OnHeroBind(int client, int heroIndex, int key)
 	}
 }
 
-public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
+public Action Timer_Hook(Handle timer, any userid)
 {
-	if(g_bHooked[client])
+	int client = GetClientOfUserId(userid);
+	if(!IsValidClient(client))
 	{
-		switch(g_SpidermanHookStyle.IntValue)
-		{
-			case 1:
-				SpidermanPhysics(client, false);
-			case 2:
-				SpidermanPhysics(client, true);
-			default:
-				SpidermanCheapReel(client);
-		}
+		g_hTimerHook[client] = INVALID_HANDLE;
+		return Plugin_Stop;
 	}
+	
+	switch(g_SpidermanHookStyle.IntValue)
+	{
+		case 1:
+			SpidermanPhysics(client, false);
+		case 2:
+			SpidermanPhysics(client, true);
+		default:
+			SpidermanCheapReel(client);
+	}
+	
+	return Plugin_Continue;
 }
 
 
@@ -283,6 +291,10 @@ public void SpiderManHookOff(int client)
 
 	if (IsValidClient(client)) 
 		SuperHero_ResetGravity(client);
+		
+	if(g_hTimerHook[client] != INVALID_HANDLE)
+		KillTimer(g_hTimerHook[client]);
+	g_hTimerHook[client] = INVALID_HANDLE;
 }
 
 public void OnMapStart()
