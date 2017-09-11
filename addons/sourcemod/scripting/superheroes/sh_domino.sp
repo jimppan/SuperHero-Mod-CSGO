@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -57,6 +57,9 @@ public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)
 
 public void SuperHero_OnPlayerTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3])
 {
+	if(!IsValidClient(attacker))
+		return;
+	
 	if(g_bHasDomino[attacker])
 	{
 		if(IsValidClient(victim))
