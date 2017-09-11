@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.12"
+#define PLUGIN_VERSION "1.13"
 
 #include <sourcemod>
 #include <sdktools>
@@ -94,7 +94,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.12",
+	name = "SuperHero Mod CS:GO v1.13",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -2404,7 +2404,6 @@ stock void ReadExperience(int client)
 
 	//g_bReadExperienceNextRound[client] = false;
 	MemoryTableUpdate(client);
-	DisplayPowers(client, false);
 }
 
 stock void SetLevel(int client, int newLevel)
