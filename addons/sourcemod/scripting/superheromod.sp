@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.13"
+#define PLUGIN_VERSION "1.14"
 
 #include <sourcemod>
 #include <sdktools>
@@ -94,7 +94,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.13",
+	name = "SuperHero Mod CS:GO v1.14",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -878,7 +878,7 @@ public int Native_SetHeroAvailableLevel(Handle plugin, int numParams)
 public Action Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	SetEntProp(client, Prop_Data, "m_ArmorValue", g_iPlayerArmor[client]);
+	
 	//if(!g_LongTermExperience.BoolValue)
 	//	g_bReadExperienceNextRound[client] = false;
 		
@@ -888,6 +888,7 @@ public Action Event_PlayerSpawn(Event event, const char[] name, bool dontBroadca
 	GetMaxHealth(client);
 	GetMaxArmor(client);
 	
+	SetEntProp(client, Prop_Data, "m_ArmorValue", g_iPlayerArmor[client]);
 	if(!g_bNewRoundSpawn[client])
 	{
 		DisplayPowers(client, true);
@@ -934,7 +935,7 @@ public Action Event_BombPlanted(Event event, const char[] name, bool dontBroadca
 		
 	int client = GetClientOfUserId(event.GetInt("userid"));	
 	LocalAddExperience(client, g_iGivenExperience[g_iPlayerLevel[client]]);
-	
+	DisplayPowers(client, false);
 	return Plugin_Continue;
 }
 
@@ -945,7 +946,7 @@ public Action Event_BombDefused(Event event, const char[] name, bool dontBroadca
 		
 	int client = GetClientOfUserId(event.GetInt("userid"));	
 	LocalAddExperience(client, g_iGivenExperience[g_iPlayerLevel[client]]);
-	
+	DisplayPowers(client, false);
 	return Plugin_Continue;
 }
 
@@ -2212,13 +2213,8 @@ stock void SetArmorPowers(int client)
 	if (!IsValidClient(client) || !IsPlayerAlive(client)/* || g_bReadExperienceNextRound[client]*/)
 		return;
 
-	int oldArmor = GetPlayerArmor(client);
 	int newArmor = GetMaxArmor(client);
-
-	// Little check for armor system
-	if ( oldArmor != 0 || oldArmor >= newArmor ) 
-		return;
-
+	
 	// Set the armor to the correct value
 	SetPlayerArmor(client, newArmor);
 }
@@ -2388,15 +2384,7 @@ stock void ReadExperience(int client)
 		return;
 
 	// Check Memory Table First
-	if (MemoryTableRead(client, savekey)) 
-	{
-		//debugMsg(id, 8, "XP Data loaded from memory table")
-	}
-	//else if ( LoadExperience(client, savekey) )  //MYSQL CODE
-	//{
-		//debugMsg(id, 8, "XP Data loaded from Vault, nVault, or MySQL save")
-	//}
-	else 
+	if(!MemoryTableRead(client, savekey))
 	{
 		// XP Not able to load, will try again next round
 		return;
