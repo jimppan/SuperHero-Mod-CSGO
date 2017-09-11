@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.05"
+#define PLUGIN_VERSION "1.06"
 
 #include <sourcemod>
 #include <sdktools>
@@ -30,6 +30,7 @@ ConVar g_SSJGohanParentPlayerWithBeam;
 
 float g_fChargeTime[MAXPLAYERS + 1];
 float g_fChargeAmount[MAXPLAYERS + 1];
+float g_vecEndPos[MAXPLAYERS + 1][3];
 int g_iTrail;
 int g_iExplosion;
 int g_iHeroIndex;
@@ -260,34 +261,46 @@ public Action Timer_Beam(Handle timer, any data)
 			return Plugin_Stop;
 		}
 		
-		if(!IsPlayerAlive(client))
-		{
-			AcceptEntityInput(entity, "Kill");
-			g_iBeam[client] = INVALID_ENT_REFERENCE;
-			g_iBeamHead[client] = INVALID_ENT_REFERENCE;
-			g_hTimerCharge[client] = INVALID_HANDLE;
-			return Plugin_Stop;
-		}
-
-		float entityPos[3], aimPos[3];
+		float entityPos[3];
 	
 		float eyeAngles[3], eyePos[3];
 		GetClientEyeAngles(client, eyeAngles);
 		GetClientEyePosition(client, eyePos);
-		Handle trace = TR_TraceRayFilterEx(eyePos, eyeAngles, MASK_ALL, RayType_Infinite, TraceFilterNotSelf, client);
-		if(TR_DidHit(trace))
-			TR_GetEndPosition(aimPos, trace);
-		CloseHandle(trace);
+		
+		if(IsPlayerAlive(client))
+		{
+			int activewep = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			if(activewep != INVALID_ENT_REFERENCE)
+			{
+				char szClassName[32];
+				GetEntityClassname(activewep, szClassName, sizeof(szClassName));
+				if(StrContains(szClassName, "knife") != -1 || StrContains(szClassName, "bayonet") != -1 )
+				{
+					Handle trace = TR_TraceRayFilterEx(eyePos, eyeAngles, MASK_ALL, RayType_Infinite, TraceFilterNotSelf, client);
+					if(TR_DidHit(trace))
+						TR_GetEndPosition(g_vecEndPos[client], trace);
+					CloseHandle(trace);
+				}
+			}
+			else
+			{
+				//Allow steering kamehameha with no weapon at all
+				Handle trace = TR_TraceRayFilterEx(eyePos, eyeAngles, MASK_ALL, RayType_Infinite, TraceFilterNotSelf, client);
+				if(TR_DidHit(trace))
+					TR_GetEndPosition(g_vecEndPos[client], trace);
+				CloseHandle(trace);
+			}
+		}
 		
 		float entityVel[3];
 
 		GetEntPropVector(entity, Prop_Send, "m_vecOrigin", entityPos);
-		float distance = GetVectorDistance(aimPos, entityPos);
+		float distance = GetVectorDistance(g_vecEndPos[client], entityPos);
 		float time = distance / g_SSJGohanBeamSpeed.FloatValue;
 
-		entityVel[0] = (aimPos[0] - entityPos[0]) / time;
-		entityVel[1] = (aimPos[1] - entityPos[1]) / time;
-		entityVel[2] = (aimPos[2] - entityPos[2]) / time;
+		entityVel[0] = (g_vecEndPos[client][0] - entityPos[0]) / time;
+		entityVel[1] = (g_vecEndPos[client][1] - entityPos[1]) / time;
+		entityVel[2] = (g_vecEndPos[client][2] - entityPos[2]) / time;
 		
 		TeleportEntity(entity, NULL_VECTOR, view_as<float>({0.0,0.0,0.0}), entityVel);
 		int color[4] =  { 0, 230, 230, 200 };
@@ -408,6 +421,25 @@ public void EndKameBeam(int client, int entity)
 	g_iBeamHead[client] = INVALID_ENT_REFERENCE;
 	g_bCharging[client] = false;
 	g_bFiringBeam[client] = false;
+}
+
+public Action OnWeaponSwitch(int client, int weapon)
+{
+	if(g_bCharging[client])
+	{
+		char szClassName[32];
+		GetEntityClassname(weapon, szClassName, sizeof(szClassName));
+		if(StrContains(szClassName, "knife") == -1 && StrContains(szClassName, "bayonet") == -1)
+		{
+			g_bCharging[client] = false;
+			StopSoundAny(client, SNDCHAN_AUTO, KAMEHAME_SOUND);
+		}
+	}
+}
+
+public void OnClientPutInServer(int client)
+{
+	SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 }
 
 public void OnMapStart()
