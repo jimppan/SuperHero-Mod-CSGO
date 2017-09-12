@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -41,7 +41,7 @@ public void OnPluginStart()
 	g_BeastGravity = CreateConVar("superheromod_beast_gravity", "0.30");
 	g_BeastSpeed = CreateConVar("superheromod_beast_speed", "2.3");
 	
-	AutoExecConfig(true, "Beast", "sourcemod/superheromod");
+	AutoExecConfig(true, "beast", "sourcemod/superheromod");
 	
 	g_iHeroIndex = SuperHero_CreateHero("Beast", g_BeastLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Speed/Health/Armor/Gravity", "Faster than flash, more health, more armor, lower gravity");
