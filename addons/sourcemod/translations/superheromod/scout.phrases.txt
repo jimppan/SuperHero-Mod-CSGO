@@ -1,0 +1,8 @@
+"Phrases"
+{
+	"Scout Jumps"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Scout Jumps: {1}/{2}"
+	}
+}
