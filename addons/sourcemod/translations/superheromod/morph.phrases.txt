@@ -1,0 +1,12 @@
+"Phrases"
+{
+	"Morphed"
+	{
+		"en"	"You've morphed into a crate!"
+	}
+	
+	"Unmorphed"
+	{
+		"en"	"You've morphed back to your original body."
+	}
+}
