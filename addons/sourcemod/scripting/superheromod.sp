@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.14"
+#define PLUGIN_VERSION "1.15"
 
 #include <sourcemod>
 #include <sdktools>
@@ -17,6 +17,7 @@
 EngineVersion g_Game;
 
 //Global variables
+bool g_bUsingVipheroes = false;
 int g_iGlowEntities[MAXPLAYERS + 1] =  { INVALID_ENT_REFERENCE, ... };
 int g_iHeroCount = 0; 																	//gSuperHeroCount
 int g_iLevelExperience[SH_MAXLEVELS + 1]; 												//gXPLevel
@@ -26,6 +27,7 @@ Handle g_hHelpCooldownSync;
 Handle g_hHeroHudSync;																	//gHeroHudSync
 Handle g_hCoolDownTimers[MAXPLAYERS + 1][SH_MAXHEROES + 1];
 Database g_hPlayerData;
+KeyValues g_VipFlags;
 
 //Player Variables
 //bool g_bReadExperienceNextRound[MAXPLAYERS + 1];										//gReadXPNextRound
@@ -94,7 +96,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.14",
+	name = "SuperHero Mod CS:GO v1.15",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -188,6 +190,19 @@ public void OnPluginStart()
 	delete kv;
 	ReadINI();
 	CvarCheck();
+	
+	char path[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, path, sizeof(path), "configs/superheromod/vipheroes.cfg");
+	g_VipFlags = new KeyValues("VipHeroes");
+	
+	if(!g_VipFlags.ImportFromFile(path))
+		g_bUsingVipheroes = false;
+	else
+	{
+		g_bUsingVipheroes = true;
+		g_VipFlags.SetEscapeSequences(true);
+	}
+	
 	
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -632,6 +647,9 @@ public int Native_EndPlayerHeroCooldown(Handle plugin, int numParams)
 	int client = GetNativeCell(1);
 	int heroIndex = GetNativeCell(2);
 	EndPlayerHeroCooldown(client, heroIndex);
+	if(g_hCoolDownTimers[client][heroIndex] != INVALID_HANDLE)
+		KillTimer(g_hCoolDownTimers[client][heroIndex]);
+	g_hCoolDownTimers[client][heroIndex] = INVALID_HANDLE;
 	g_fPlayerCooldownEndTime[client][heroIndex] = 0.0;
 }
 
@@ -1173,17 +1191,38 @@ public Action Command_Heroes(int client, int args)
 	// OK BUILD A LIST OF HEROES THIS PERSON CAN PICK FROM
 	g_iPlayerMenuChoices[client][0] = 0; // <- 0 choices so far
 	int count = 0; 
+	int heroFlags;
 	bool thisEnabled;
-
+	char szHeroFlags[32];
+	
 	for(int i = 0; i < g_iHeroCount; i++)  
 	{
 		heroIndex = i;
 		heroLevel = GetHeroLevel(heroIndex);
 		thisEnabled = false;
+
 		if(playerLevel >= heroLevel) 
 		{
 			if (/*g_iPlayerPowersLeft[client][heroLevel] > 0 && */!(g_iPlayerBinds[client][0] >= g_MaxBinds.IntValue && g_hHeroes[heroIndex][requiresBind]))
-				thisEnabled = true;
+			{
+				//Vip system
+				if(g_bUsingVipheroes)
+				{
+					g_VipFlags.Rewind();
+					g_VipFlags.GetString(g_hHeroes[heroIndex][szHero], szHeroFlags, sizeof(szHeroFlags), "");
+					
+					if(!StrEqual(szHeroFlags, "", false))
+					{
+						heroFlags = ReadFlagString(szHeroFlags);
+						if((GetUserFlagBits(client) & heroFlags) || CheckCommandAccess(client, "", ADMFLAG_ROOT, true))
+							thisEnabled = true;
+					}
+					else
+						thisEnabled = true;
+				}
+				else
+					thisEnabled = true;
+			}
 				
 			// Don't want to present this power if the player already has it!
 			if (!PlayerHasPower(client, heroIndex) && thisEnabled) 
