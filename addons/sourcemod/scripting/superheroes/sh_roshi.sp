@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -47,7 +47,7 @@ public void OnPluginStart()
 	AutoExecConfig(true, "roshi", "sourcemod/superheromod");
 	
 	g_iHeroIndex = SuperHero_CreateHero("Master Roshi", g_RoshiLevel.IntValue);
-	SuperHero_SetHeroInfo(g_iHeroIndex, "No Flash", "Equip sunglasses that blocks bright flashes");
+	SuperHero_SetHeroInfo(g_iHeroIndex, "No Flash", "Equip sunglasses that blocks bright flashes\nHealth & Armor/Speed boost");
 	SuperHero_SetHeroHealth(g_iHeroIndex, g_RoshiHealth.IntValue);
 	SuperHero_SetHeroArmor(g_iHeroIndex, g_RoshiArmor.IntValue);
 	SuperHero_SetHeroSpeed(g_iHeroIndex, g_RoshiSpeed.FloatValue);
