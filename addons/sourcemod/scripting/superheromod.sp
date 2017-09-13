@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.15"
+#define PLUGIN_VERSION "1.16"
 
 #include <sourcemod>
 #include <sdktools>
@@ -96,7 +96,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.15",
+	name = "SuperHero Mod CS:GO v1.16",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -128,6 +128,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_shsetxp", 			Command_SetExperience, ADMFLAG_BAN, "Allows admins to set a players XP to a specified amount");
 	RegAdminCmd("sm_shaddxp", 			Command_AddExperience, ADMFLAG_BAN, "Allows admins to give add XP to their current XP");
 	RegAdminCmd("sm_shsetlevel", 		Command_SetLevel, ADMFLAG_BAN, "Allows admins to set a players level to a specified number");
+	RegAdminCmd("sm_shreloadvip", 		Command_ReloadVipConfig, ADMFLAG_ROOT, "Refresh the vipheroes config");
 	//RegAdminCmd("sm_shimmunexp", 		Command_Immune, ADMFLAG_BAN, "Allows admins to set/unset players immune from save days XP reset");
 	//RegAdminCmd("sm_shresetxp",		Command_ResetExperience, ADMFLAG_BAN, "Allows admins with ADMIN_RCON to reset all the saved XP");
 	
@@ -198,10 +199,7 @@ public void OnPluginStart()
 	if(!g_VipFlags.ImportFromFile(path))
 		g_bUsingVipheroes = false;
 	else
-	{
 		g_bUsingVipheroes = true;
-		g_VipFlags.SetEscapeSequences(true);
-	}
 	
 	
 	for (int i = 1; i <= MaxClients; i++)
@@ -1337,6 +1335,20 @@ public Action Command_SetLevel(int client, int args)
 		DisplayPowers(target_list[i], true);
 		ReplyToCommand(client, "%t", "Set Level", SH_PREFIX, target_list[i], setlevel);
 	}
+	return Plugin_Handled;
+}
+
+public Action Command_ReloadVipConfig(int client, int args)
+{
+	char path[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, path, sizeof(path), "configs/superheromod/vipheroes.cfg");
+	g_VipFlags = new KeyValues("VipHeroes");
+	
+	if(!g_VipFlags.ImportFromFile(path))
+		g_bUsingVipheroes = false;
+	else
+		g_bUsingVipheroes = true;
+		
 	return Plugin_Handled;
 }
 
