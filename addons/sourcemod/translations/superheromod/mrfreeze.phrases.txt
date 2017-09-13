@@ -1,0 +1,8 @@
+"Phrases"
+{
+	"Ground Already Frozen"
+	{
+		"#format"		"{1:s},{2:s}"
+		"en"			"{1} {2} Ground is already frozen!"
+	}
+}
