@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -154,7 +154,7 @@ public Action OnPreThinkPost(int client)
 	if(g_bHasFreeze[client])
 		return Plugin_Continue;
 		
-	if(GetClientTeam(client) != g_iFrozenTeam)
+	if(GetClientTeam(client) == g_iFrozenTeam)
 		return Plugin_Continue;
 	
 	if(GetEntityFlags(client) & FL_ONGROUND)

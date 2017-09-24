@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.16"
+#define PLUGIN_VERSION "1.17"
 
 #include <sourcemod>
 #include <sdktools>
@@ -645,10 +645,6 @@ public int Native_EndPlayerHeroCooldown(Handle plugin, int numParams)
 	int client = GetNativeCell(1);
 	int heroIndex = GetNativeCell(2);
 	EndPlayerHeroCooldown(client, heroIndex);
-	if(g_hCoolDownTimers[client][heroIndex] != INVALID_HANDLE)
-		KillTimer(g_hCoolDownTimers[client][heroIndex]);
-	g_hCoolDownTimers[client][heroIndex] = INVALID_HANDLE;
-	g_fPlayerCooldownEndTime[client][heroIndex] = 0.0;
 }
 
 public int Native_IsPlayerHeroInCooldown(Handle plugin, int numParams)
@@ -663,7 +659,8 @@ public int Native_ForceSetPlayerHeroCooldown(Handle plugin, int numParams)
 	int client = GetNativeCell(1);
 	int heroIndex = GetNativeCell(2);
 	g_bPlayerInCooldown[client][heroIndex] = GetNativeCell(3);
-	EndPlayerHeroCooldown(client, heroIndex);
+	if(!g_bPlayerInCooldown[client][heroIndex])
+		EndPlayerHeroCooldown(client, heroIndex);
 }
 
 public int Native_AddHealth(Handle plugin, int numParams)
@@ -1967,6 +1964,7 @@ stock void EndPlayerHeroCooldown(int client, int heroIndex)
 		KillTimer(g_hCoolDownTimers[client][heroIndex]);
 	g_hCoolDownTimers[client][heroIndex] = INVALID_HANDLE;
 	g_bPlayerInCooldown[client][heroIndex] = false;
+	g_fPlayerCooldownEndTime[client][heroIndex] = 0.0;
 }
 
 stock int GetHeroLevel(int heroIndex)
