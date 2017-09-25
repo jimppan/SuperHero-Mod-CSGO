@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -123,6 +123,9 @@ void CS_CreateExplosion(int client, int damage, int radius, float pos[3])
 
 public void TriggerExplosion(int entity)
 {
+	if(entity == INVALID_ENT_REFERENCE)
+		return;
+		
 	int owner = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
 	AcceptEntityInput(entity, "explode");
 	float entityPos[3];
