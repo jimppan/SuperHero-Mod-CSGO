@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.17"
+#define PLUGIN_VERSION "1.18"
 
 #include <sourcemod>
 #include <sdktools>
@@ -96,7 +96,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.17",
+	name = "SuperHero Mod CS:GO v1.18",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -202,9 +202,9 @@ public void OnPluginStart()
 		g_bUsingVipheroes = true;
 	
 	
-	for (int i = 1; i <= MaxClients; i++)
+	for (int i = 0; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i))
+		if(IsClientInGame(i) && i > 0)
 			OnClientPutInServer(i);
 			
 		for (int j = 0; j <= SH_MAXHEROES;j++)
@@ -625,12 +625,10 @@ public int Native_SetPlayerHeroCooldown(Handle plugin, int numParams)
 	int heroIndex = GetNativeCell(2);
 	float cooldown = GetNativeCell(3);
 	
-	if(g_hCoolDownTimers[client][heroIndex] != INVALID_HANDLE)
-		KillTimer(g_hCoolDownTimers[client][heroIndex]);
-	g_hCoolDownTimers[client][heroIndex] = INVALID_HANDLE;
-	
 	if(!IsValidClient(client))
 		return;
+	
+	EndPlayerHeroCooldown(client, heroIndex);
 		
 	g_fPlayerCooldownEndTime[client][heroIndex] = GetGameTime() + cooldown;
 	g_bPlayerInCooldown[client][heroIndex] = true;
@@ -644,6 +642,10 @@ public int Native_EndPlayerHeroCooldown(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
 	int heroIndex = GetNativeCell(2);
+	
+	if(!IsValidClient(client))
+		return;
+		
 	EndPlayerHeroCooldown(client, heroIndex);
 }
 
@@ -1700,6 +1702,13 @@ public void OnClientDisconnect(int client)
 {
 	if(IsClientInGame(client) && !IsFakeClient(client))
 		WriteData(client);
+		
+	for (int i = 0; i <= SH_MAXHEROES; i++)
+	{
+		if(g_hCoolDownTimers[client][i] != INVALID_HANDLE)
+			KillTimer(g_hCoolDownTimers[client][i]);
+		g_hCoolDownTimers[client][i] = INVALID_HANDLE;
+	}
 		
 	int ent = EntRefToEntIndex(g_iGlowEntities[client]);
 	if(ent != INVALID_ENT_REFERENCE)
