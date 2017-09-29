@@ -204,7 +204,7 @@ public void OnPluginStart()
 	
 	for (int i = 0; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i) && i > 0)
+		if(i > 0 && IsClientInGame(i))
 			OnClientPutInServer(i);
 			
 		for (int j = 0; j <= SH_MAXHEROES;j++)
