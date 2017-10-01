@@ -1,0 +1,12 @@
+"Phrases"
+{
+	"Invisible On"
+	{
+		"pl"		"Jesteś niewidzialny!"
+	}
+	
+	"Invisible Off"
+	{
+		"pl"		"Już nie jesteś niewidzialny."
+	}
+}

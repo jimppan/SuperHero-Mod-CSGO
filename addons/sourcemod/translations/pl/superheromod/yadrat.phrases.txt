@@ -1,0 +1,19 @@
+"Phrases"
+{
+	"Equip Knife"
+	{
+		"pl"	"WEŹ NÓŻ, BY UŻYĆ BŁYSKAWICZNEJ TRANSMISJI"
+	}
+	
+	"No Players"
+	{
+		"#format"	"{1:s}"
+		"pl"		"{1} Nie można znaleźć żadnych poziomów mocy!"
+	}
+	
+	"No Valid Players"
+	{
+		"#format"	"{1:s}"
+		"pl"	"{1} Twój przedciwnik jest w wąskim pomieszczeniu!"
+	}
+}

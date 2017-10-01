@@ -1,0 +1,8 @@
+"Phrases"
+{
+	"Ground Already Frozen"
+	{
+		"#format"		"{1:s},{2:s}"
+		"pl"			"{1} {2} Ziemia jest już zamrożona!"
+	}
+}

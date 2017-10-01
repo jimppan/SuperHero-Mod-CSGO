@@ -1,0 +1,7 @@
+"Phrases"
+{
+	"Equip Knife"
+	{
+		"pl"	"WEŹ NÓŻ ABY UŻYĆ KAMEHAMEHA"
+	}
+}

@@ -1,0 +1,7 @@
+"Phrases"
+{
+	"No Optic Blasts"
+	{
+		"pl"	"Nie masz już optycznych laserów!"
+	}
+}

@@ -1,0 +1,7 @@
+"Phrases"
+{
+	"No Hooks Left"
+	{
+		"pl"	"Brak haków!"
+	}
+}

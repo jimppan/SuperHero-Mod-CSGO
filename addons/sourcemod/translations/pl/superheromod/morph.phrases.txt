@@ -1,0 +1,12 @@
+"Phrases"
+{
+	"Morphed"
+	{
+		"pl"	"Zamieniłeś się w skrzynkę!"
+	}
+	
+	"Unmorphed"
+	{
+		"pl"	"Wróciłeś do swojej pierwotnej formy!"
+	}
+}

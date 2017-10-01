@@ -1,0 +1,14 @@
+"Phrases"
+{
+	"Morphed"
+	{
+		"#format"		"{1:s}"
+		"pl"	"{1} - WYGLĄDASZ JAK PRZECIWNIK"
+	}
+	
+	"Unmorphed"
+	{
+		"#format"		"{1:s}"
+		"pl"	"{1} - PRZYWRÓCONO WYGLĄD"
+	}
+}

@@ -1,0 +1,15 @@
+"Phrases"
+{
+	"Already In Noclip"
+	{
+		"#format"		"{1:s},{2:s}"
+		"pl"	"{1} {2} Już masz noclip!"
+	}
+	
+	"Noclip"
+	{
+		"#format"		"{1:d},{2:s}"
+		"pl"	"{1} sekund{2} noclipa zostało!\Nie zablokuj się, bo zginiesz!"
+	}
+	
+}
