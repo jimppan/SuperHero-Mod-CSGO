@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.01"
+#define PLUGIN_VERSION "1.02"
 
 #include <sourcemod>
 #include <sdktools>
@@ -65,11 +65,10 @@ public void SuperHero_OnHeroInitialized(int client, int heroIndex, int mode)
 
 public void SuperHero_OnPlayerSpawned(int client, bool newroundspawn)
 {
-	if(IsGameLive())
+	if(!newroundspawn)
 		SuperHero_ForceSetPlayerHeroCooldown(client, g_iHeroIndex, true);
 	else
 		SuperHero_ForceSetPlayerHeroCooldown(client, g_iHeroIndex, false);
-	
 }
 
 public void SuperHero_OnPlayerDeath(int victim, int attacker, bool headshot)

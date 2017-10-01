@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.18"
+#define PLUGIN_VERSION "1.19"
 
 #include <sourcemod>
 #include <sdktools>
@@ -96,7 +96,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.18",
+	name = "SuperHero Mod CS:GO v1.19",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -660,9 +660,9 @@ public int Native_ForceSetPlayerHeroCooldown(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
 	int heroIndex = GetNativeCell(2);
-	g_bPlayerInCooldown[client][heroIndex] = GetNativeCell(3);
-	if(!g_bPlayerInCooldown[client][heroIndex])
-		EndPlayerHeroCooldown(client, heroIndex);
+	bool iscooldown = view_as<bool>(GetNativeCell(3));
+	EndPlayerHeroCooldown(client, heroIndex);
+	g_bPlayerInCooldown[client][heroIndex] = iscooldown;
 }
 
 public int Native_AddHealth(Handle plugin, int numParams)
