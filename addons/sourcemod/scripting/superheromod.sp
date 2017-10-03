@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.19"
+#define PLUGIN_VERSION "1.20"
 
 #include <sourcemod>
 #include <sdktools>
@@ -83,6 +83,7 @@ ConVar g_StartExperience;
 ConVar g_GiveExperienceOnPlant;
 ConVar g_GiveExperienceOnDefuse;
 ConVar g_GlobalBindCooldown;
+ConVar g_Logs;
 
 //Forwards
 Handle g_hOnHeroInitialized;
@@ -96,7 +97,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.19",
+	name = "SuperHero Mod CS:GO v1.20",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -170,6 +171,7 @@ public void OnPluginStart()
 	g_GiveExperienceOnPlant = 			CreateConVar("superheromod_give_experience_on_plant", "1", "Should players get experience when they plant the bomb?");
 	g_GiveExperienceOnDefuse = 			CreateConVar("superheromod_give_experience_on_defuse", "1", "Should players get experience when defusing a bomb?");
 	g_GlobalBindCooldown = 				CreateConVar("superheromod_global_bind_cooldown", "0.5", "Amount of seconds until the player can press another power key");
+	g_Logs =							CreateConVar("superheromod_enable_logs", "1", "Enable logging for leveling up");
 	
 	g_hOnHeroInitialized =				CreateGlobalForward("SuperHero_OnHeroInitialized", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 	g_hOnPlayerSpawned = 				CreateGlobalForward("SuperHero_OnPlayerSpawned", ET_Ignore, Param_Cell, Param_Cell);
@@ -2467,6 +2469,13 @@ stock void TestLevel(int client)
 	// Play a Sound on Level Change!
 	if ( oldLevel != newLevel ) 
 	{
+		if(g_Logs.BoolValue)
+		{
+			char authid64[32], authid[32];
+			GetClientAuthId(client, AuthId_SteamID64, authid64, sizeof(authid64));
+			GetClientAuthId(client, AuthId_Engine, authid, sizeof(authid));
+			LogMessage("%N (%s) (%s): Leveled up from level %d to %d (XP: %d)", client, authid, authid64, oldLevel, newLevel, g_iPlayerExperience[client]);
+		}
 		SetLevel(client, newLevel);
 		if (newLevel != 0)
 			EmitSoundToClientAny(client, LEVEL_SOUND);
