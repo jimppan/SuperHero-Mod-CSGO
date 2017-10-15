@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.21"
+#define PLUGIN_VERSION "1.22"
 
 #include <sourcemod>
 #include <sdktools>
@@ -98,7 +98,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.21",
+	name = "SuperHero Mod CS:GO v1.22",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -952,7 +952,7 @@ public Action Event_BombPlanted(Event event, const char[] name, bool dontBroadca
 	if(!g_GiveExperienceOnPlant.BoolValue)
 		return Plugin_Continue;
 		
-	if(GetTeamClientCount(CS_TEAM_T) && GetTeamClientCount(CS_TEAM_CT) < g_PlayerCountForExperience.IntValue)
+	if((GetTeamClientCount(CS_TEAM_T) + GetTeamClientCount(CS_TEAM_CT)) < g_PlayerCountForExperience.IntValue)
 		return Plugin_Continue;
 
 	int client = GetClientOfUserId(event.GetInt("userid"));	
@@ -966,7 +966,7 @@ public Action Event_BombDefused(Event event, const char[] name, bool dontBroadca
 	if(!g_GiveExperienceOnDefuse.BoolValue)
 		return Plugin_Continue;
 	
-	if(GetTeamClientCount(CS_TEAM_T) && GetTeamClientCount(CS_TEAM_CT) < g_PlayerCountForExperience.IntValue)
+	if((GetTeamClientCount(CS_TEAM_T) + GetTeamClientCount(CS_TEAM_CT)) < g_PlayerCountForExperience.IntValue)
 		return Plugin_Continue;
 
 	int client = GetClientOfUserId(event.GetInt("userid"));	
@@ -995,7 +995,7 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
 	if(!IsGameLive())
 		return Plugin_Continue;
 	
-	if(GetTeamClientCount(CS_TEAM_T) && GetTeamClientCount(CS_TEAM_CT) < g_PlayerCountForExperience.IntValue)
+	if((GetTeamClientCount(CS_TEAM_T) + GetTeamClientCount(CS_TEAM_CT)) < g_PlayerCountForExperience.IntValue)
 		return Plugin_Continue;
 	
 	if(IsValidClient(attacker) && IsValidClient(victim) && attacker != victim)
