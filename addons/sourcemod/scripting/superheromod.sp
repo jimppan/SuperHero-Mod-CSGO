@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.20"
+#define PLUGIN_VERSION "1.21"
 
 #include <sourcemod>
 #include <sdktools>
@@ -84,6 +84,7 @@ ConVar g_GiveExperienceOnPlant;
 ConVar g_GiveExperienceOnDefuse;
 ConVar g_GlobalBindCooldown;
 ConVar g_Logs;
+ConVar g_PlayerCountForExperience;
 
 //Forwards
 Handle g_hOnHeroInitialized;
@@ -97,7 +98,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.20",
+	name = "SuperHero Mod CS:GO v1.21",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -172,6 +173,7 @@ public void OnPluginStart()
 	g_GiveExperienceOnDefuse = 			CreateConVar("superheromod_give_experience_on_defuse", "1", "Should players get experience when defusing a bomb?");
 	g_GlobalBindCooldown = 				CreateConVar("superheromod_global_bind_cooldown", "0.5", "Amount of seconds until the player can press another power key");
 	g_Logs =							CreateConVar("superheromod_enable_logs", "1", "Enable logging for leveling up");
+	g_PlayerCountForExperience =		CreateConVar("superheromod_player_count_for_experience", "4", "Amount of players needed to gain experience");
 	
 	g_hOnHeroInitialized =				CreateGlobalForward("SuperHero_OnHeroInitialized", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 	g_hOnPlayerSpawned = 				CreateGlobalForward("SuperHero_OnPlayerSpawned", ET_Ignore, Param_Cell, Param_Cell);
@@ -950,6 +952,9 @@ public Action Event_BombPlanted(Event event, const char[] name, bool dontBroadca
 	if(!g_GiveExperienceOnPlant.BoolValue)
 		return Plugin_Continue;
 		
+	if(GetTeamClientCount(CS_TEAM_T) && GetTeamClientCount(CS_TEAM_CT) < g_PlayerCountForExperience.IntValue)
+		return Plugin_Continue;
+
 	int client = GetClientOfUserId(event.GetInt("userid"));	
 	LocalAddExperience(client, g_iGivenExperience[g_iPlayerLevel[client]]);
 	DisplayPowers(client, false);
@@ -960,7 +965,10 @@ public Action Event_BombDefused(Event event, const char[] name, bool dontBroadca
 {
 	if(!g_GiveExperienceOnDefuse.BoolValue)
 		return Plugin_Continue;
-		
+	
+	if(GetTeamClientCount(CS_TEAM_T) && GetTeamClientCount(CS_TEAM_CT) < g_PlayerCountForExperience.IntValue)
+		return Plugin_Continue;
+
 	int client = GetClientOfUserId(event.GetInt("userid"));	
 	LocalAddExperience(client, g_iGivenExperience[g_iPlayerLevel[client]]);
 	DisplayPowers(client, false);
@@ -985,6 +993,9 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
 	Call_Finish();
 	
 	if(!IsGameLive())
+		return Plugin_Continue;
+	
+	if(GetTeamClientCount(CS_TEAM_T) && GetTeamClientCount(CS_TEAM_CT) < g_PlayerCountForExperience.IntValue)
 		return Plugin_Continue;
 	
 	if(IsValidClient(attacker) && IsValidClient(victim) && attacker != victim)
