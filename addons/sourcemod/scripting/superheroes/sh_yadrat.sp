@@ -3,7 +3,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.02"
+#define PLUGIN_VERSION "1.03"
 
 #include <sourcemod>
 #include <sdktools>
@@ -18,9 +18,11 @@ EngineVersion g_Game;
 ConVar g_YadratLevel;
 ConVar g_YadratCooldown;
 ConVar g_YadratTeleportTime;
+ConVar g_TimeUntilCanBeUsed;
 
 int g_iHeroIndex;
 bool g_bInTransmission[MAXPLAYERS + 1];
+bool g_bCanBeUsed = false;
 float g_vecPreviousPos[MAXPLAYERS + 1][3];
 float g_vecWorldMaxs[3];
 public Plugin myinfo = 
@@ -44,12 +46,32 @@ public void OnPluginStart()
 	g_YadratLevel = CreateConVar("superheromod_yadrat_level", "7");
 	g_YadratCooldown = CreateConVar("superheromod_yadrat_cooldown", "30", "Seconds until next instant transmission");
 	g_YadratTeleportTime = CreateConVar("superheromod_yadrat_teleport_time", "3", "Seconds until arrival");
+	g_TimeUntilCanBeUsed = CreateConVar("superheromod_time_until_can_be_used", "10", "Seconds until yadrat can be used from round start");
+	
+	HookEvent("round_freeze_end", Event_RoundFreezeEnd);
 	
 	AutoExecConfig(true, "yadrat", "sourcemod/superheromod");
 	
 	g_iHeroIndex = SuperHero_CreateHero("Yadrat", g_YadratLevel.IntValue);
 	SuperHero_SetHeroInfo(g_iHeroIndex, "Instant Transmission", "Press +POWER key to teleport to your nearest target \n(If he is above level 0)");
 	SuperHero_SetHeroBind(g_iHeroIndex);
+}
+
+public Action Event_RoundFreezeEnd(Event event, const char[] name, bool dontBroadcast)
+{
+	if(!g_TimeUntilCanBeUsed.BoolValue)
+	{
+		g_bCanBeUsed = true;
+		return Plugin_Continue;
+	}
+	g_bCanBeUsed = false;
+	CreateTimer(g_TimeUntilCanBeUsed.FloatValue, Timer_CanBeUsed, _, TIMER_FLAG_NO_MAPCHANGE);
+	return Plugin_Continue;
+}
+
+public Action Timer_CanBeUsed(Handle timer, any data)
+{
+	g_bCanBeUsed = true;
 }
 
 public void OnConfigsExecuted()
@@ -81,7 +103,7 @@ public void SuperHero_OnHeroBind(int client, int heroIndex, int key)
 			if(IsFreezeTime() || !IsPlayerAlive(client))
 				return;
 			
-			if(g_bInTransmission[client])
+			if(g_bInTransmission[client] || !g_bCanBeUsed)
 			{
 				SuperHero_PlayDenySound(client);
 				return;

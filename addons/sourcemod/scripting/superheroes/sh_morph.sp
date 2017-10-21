@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -118,13 +118,14 @@ stock int CreateBox(int client)
 	if (IsValidEntity(entity)) 
 	{
 		SetEntityModel(entity, CRATE_MODEL);
-		SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
-		SetEntProp(entity, Prop_Data, "m_CollisionGroup", 1);
-		SetEntProp(entity, Prop_Send, "m_usSolidFlags", 12);
-		SetEntProp(entity, Prop_Send, "m_nSolidType", 6);
 		DispatchSpawn(entity);
 		SetEntityMoveType(entity, MOVETYPE_NONE);
 		SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
+		
+		SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", client);
+		SetEntProp(entity, Prop_Data, "m_CollisionGroup", 0);
+		SetEntProp(entity, Prop_Send, "m_usSolidFlags", 4);
+		SetEntProp(entity, Prop_Send, "m_nSolidType", 0);
 		
 		float pos[3], angles[3];
 		GetClientAbsOrigin(client, pos);

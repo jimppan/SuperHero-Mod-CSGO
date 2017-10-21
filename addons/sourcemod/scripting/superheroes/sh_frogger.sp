@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.01"
 
 #include <sourcemod>
 #include <sdktools>
@@ -65,6 +65,9 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	{
 		if((buttons & IN_JUMP) && (buttons & IN_DUCK) && GetEntityFlags(client) & FL_ONGROUND)
 		{
+			if(!IsGameLive() || !IsPlayerAlive(client))
+				return Plugin_Continue;
+			
 			float eyePos[3];
 			float fwd[3];
 			GetClientEyeAngles(client, eyePos);
@@ -107,4 +110,5 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, fwd);
 		}
 	}
+	return Plugin_Continue;
 }

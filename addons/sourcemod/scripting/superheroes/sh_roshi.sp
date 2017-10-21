@@ -1,3 +1,4 @@
+//http://dragonball.wikia.com/wiki/Master_Roshi
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"

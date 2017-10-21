@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.22"
+#define PLUGIN_VERSION "1.23"
 
 #include <sourcemod>
 #include <sdktools>
@@ -85,6 +85,9 @@ ConVar g_GiveExperienceOnDefuse;
 ConVar g_GlobalBindCooldown;
 ConVar g_Logs;
 ConVar g_PlayerCountForExperience;
+ConVar g_AllowBuyingExperience;
+ConVar g_AmountOfMoneyPaidForExperience;
+ConVar g_AmountOfBuyExperience;
 
 //Forwards
 Handle g_hOnHeroInitialized;
@@ -98,7 +101,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.22",
+	name = "SuperHero Mod CS:GO v1.23",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -126,6 +129,7 @@ public void OnPluginStart()
 	HookEvent("round_freeze_end", 		Event_RoundFreezeEnd);
 	HookEvent("bomb_planted", 			Event_BombPlanted);
 	HookEvent("bomb_defused", 			Event_BombDefused);
+	HookEvent("item_purchase", 			Event_ItemPurchase, EventHookMode_Post);
 	
 	RegAdminCmd("sm_shsetxp", 			Command_SetExperience, ADMFLAG_BAN, "Allows admins to set a players XP to a specified amount");
 	RegAdminCmd("sm_shaddxp", 			Command_AddExperience, ADMFLAG_BAN, "Allows admins to give add XP to their current XP");
@@ -151,6 +155,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_drophero", 		Command_Drop, "Is used to remove a hero from your hero list in case you want another");
 	RegConsoleCmd("sm_drop", 			Command_Drop, "Is used to remove a hero from your hero list in case you want another");
 	RegConsoleCmd("sm_whohas", 			Command_WhoHas, "Shows you who has the named heroes in the current game");
+	RegConsoleCmd("sm_buyxp", 			Command_BuyExperience, "Buy experience");
 	
 	char powerDown[10], powerUp[10];
 	for (int i = 1; i <= SH_MAXBINDPOWERS; i++)
@@ -174,6 +179,9 @@ public void OnPluginStart()
 	g_GlobalBindCooldown = 				CreateConVar("superheromod_global_bind_cooldown", "0.5", "Amount of seconds until the player can press another power key");
 	g_Logs =							CreateConVar("superheromod_enable_logs", "1", "Enable logging for leveling up");
 	g_PlayerCountForExperience =		CreateConVar("superheromod_player_count_for_experience", "4", "Amount of players needed to gain experience");
+	g_AllowBuyingExperience = 			CreateConVar("superheromod_allow_buy_experience", "1", "Allow experience to be bought");
+	g_AmountOfMoneyPaidForExperience = 	CreateConVar("superheromod_amount_of_money_paid_for_experience", "16000", "Amount of money needed to buy experience");
+	g_AmountOfBuyExperience = 			CreateConVar("superheromod_amount_of_buy_experience", "50", "Amount of experience gained for 16000 money");
 	
 	g_hOnHeroInitialized =				CreateGlobalForward("SuperHero_OnHeroInitialized", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 	g_hOnPlayerSpawned = 				CreateGlobalForward("SuperHero_OnPlayerSpawned", ET_Ignore, Param_Cell, Param_Cell);
@@ -975,6 +983,16 @@ public Action Event_BombDefused(Event event, const char[] name, bool dontBroadca
 	return Plugin_Continue;
 }
 
+public Action Event_ItemPurchase(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));	
+	char itemBought[32];
+	event.GetString("weapon", itemBought, sizeof(itemBought));
+	PrintToChatAll("ITEM: %s", itemBought);
+}
+
+
+
 public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));	
@@ -1585,6 +1603,25 @@ public Action Command_ClearHeroes(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action Command_BuyExperience(int client, int args)
+{
+	if(!g_AllowBuyingExperience.BoolValue)
+		return Plugin_Handled;
+	
+	int money = GetEntProp(client, Prop_Send, "m_iAccount");
+	if(money >= g_AmountOfMoneyPaidForExperience.IntValue)
+	{
+		LocalAddExperience(client, g_AmountOfBuyExperience.IntValue);
+		DisplayPowers(client, false);
+		SetEntProp(client, Prop_Send, "m_iAccount", money - g_AmountOfMoneyPaidForExperience.IntValue);
+	}
+	else
+	{
+		ReplyToCommand(client, "%t", "Not Enough Money", SH_PREFIX, "\x04", g_AmountOfMoneyPaidForExperience.IntValue, "\x09");
+	}
+	return Plugin_Handled;
+}
+
 /////////////////////
 //	MENU HANDLERS  //
 /////////////////////
@@ -1773,6 +1810,8 @@ public void OnMapStart()
 	
 	PrecacheModel(SH_DEFAULT_MODEL_CT, true);
 	PrecacheModel(SH_DEFAULT_MODEL_T, true);
+	
+	SetConVarInt(FindConVar("mp_free_armor"), 2);
 }
 
 //////////////

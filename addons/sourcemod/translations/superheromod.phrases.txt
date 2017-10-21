@@ -110,4 +110,10 @@
 		"#format"		"{1:s}"
 		"en"			"{1} See console for output!"
 	}
+	
+	"Not Enough Money"
+	{
+		"#format"		"{1:s}{2:s}{3:d}{4:s}"
+		"en"			"{1} You do not have enough money [{2}{3}{4}]"
+	}
 }
