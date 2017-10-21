@@ -129,7 +129,6 @@ public void OnPluginStart()
 	HookEvent("round_freeze_end", 		Event_RoundFreezeEnd);
 	HookEvent("bomb_planted", 			Event_BombPlanted);
 	HookEvent("bomb_defused", 			Event_BombDefused);
-	HookEvent("item_purchase", 			Event_ItemPurchase, EventHookMode_Post);
 	
 	RegAdminCmd("sm_shsetxp", 			Command_SetExperience, ADMFLAG_BAN, "Allows admins to set a players XP to a specified amount");
 	RegAdminCmd("sm_shaddxp", 			Command_AddExperience, ADMFLAG_BAN, "Allows admins to give add XP to their current XP");
@@ -982,16 +981,6 @@ public Action Event_BombDefused(Event event, const char[] name, bool dontBroadca
 	DisplayPowers(client, false);
 	return Plugin_Continue;
 }
-
-public Action Event_ItemPurchase(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));	
-	char itemBought[32];
-	event.GetString("weapon", itemBought, sizeof(itemBought));
-	PrintToChatAll("ITEM: %s", itemBought);
-}
-
-
 
 public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
