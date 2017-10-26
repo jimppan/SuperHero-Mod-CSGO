@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.23"
+#define PLUGIN_VERSION "1.24"
 
 #include <sourcemod>
 #include <sdktools>
@@ -101,7 +101,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.23",
+	name = "SuperHero Mod CS:GO v1.24",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -1603,6 +1603,7 @@ public Action Command_BuyExperience(int client, int args)
 		LocalAddExperience(client, g_AmountOfBuyExperience.IntValue);
 		DisplayPowers(client, false);
 		SetEntProp(client, Prop_Send, "m_iAccount", money - g_AmountOfMoneyPaidForExperience.IntValue);
+		SetEntProp(client, Prop_Send, "m_iStartAccount", money - g_AmountOfMoneyPaidForExperience.IntValue);
 	}
 	else
 	{
