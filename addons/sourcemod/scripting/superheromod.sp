@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.24"
+#define PLUGIN_VERSION "1.25"
 
 #include <sourcemod>
 #include <sdktools>
@@ -88,6 +88,7 @@ ConVar g_PlayerCountForExperience;
 ConVar g_AllowBuyingExperience;
 ConVar g_AmountOfMoneyPaidForExperience;
 ConVar g_AmountOfBuyExperience;
+ConVar g_SaveExperienceInterval;
 
 //Forwards
 Handle g_hOnHeroInitialized;
@@ -101,7 +102,7 @@ Handle g_hOnHeroBind;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.24",
+	name = "SuperHero Mod CS:GO v1.25",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -181,6 +182,7 @@ public void OnPluginStart()
 	g_AllowBuyingExperience = 			CreateConVar("superheromod_allow_buy_experience", "1", "Allow experience to be bought");
 	g_AmountOfMoneyPaidForExperience = 	CreateConVar("superheromod_amount_of_money_paid_for_experience", "16000", "Amount of money needed to buy experience");
 	g_AmountOfBuyExperience = 			CreateConVar("superheromod_amount_of_buy_experience", "50", "Amount of experience gained for 16000 money");
+	g_SaveExperienceInterval = 			CreateConVar("superheromod_save_experience_interval", "60", "Amount of time (in seconds) between each save of experience occurs");
 	
 	g_hOnHeroInitialized =				CreateGlobalForward("SuperHero_OnHeroInitialized", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 	g_hOnPlayerSpawned = 				CreateGlobalForward("SuperHero_OnPlayerSpawned", ET_Ignore, Param_Cell, Param_Cell);
@@ -1802,11 +1804,24 @@ public void OnMapStart()
 	PrecacheModel(SH_DEFAULT_MODEL_T, true);
 	
 	SetConVarInt(FindConVar("mp_free_armor"), 2);
+	
+	CreateTimer(g_SaveExperienceInterval.FloatValue, Timer_SaveExperience, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 }
 
 //////////////
 //	TIMERS  //
 //////////////
+
+public Action Timer_SaveExperience(Handle timer, any data)
+{
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if(IsValidClient(i) && !IsFakeClient(i))
+			WriteData(i);
+	}
+	
+	return Plugin_Continue;
+}
 
 public Action Timer_All(Handle timer, any data)
 {
@@ -2083,6 +2098,13 @@ stock void InitializePlayer(int client)
 		
 	for (int i = 0; i <= SH_MAXHEROES; i++)
 		g_bPlayerInCooldown[client][i] = false;
+	
+	for (int i = 0; i <= SH_MAXHEROES; i++)
+	{
+		if(g_hCoolDownTimers[client][i] != INVALID_HANDLE)
+			KillTimer(g_hCoolDownTimers[client][i]);
+		g_hCoolDownTimers[client][i] = INVALID_HANDLE;
+	}
 	
 	int heroIndex;
 
