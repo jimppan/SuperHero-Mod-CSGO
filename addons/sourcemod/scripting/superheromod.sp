@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.27"
+#define PLUGIN_VERSION "1.26"
 
 #include <sourcemod>
 #include <sdktools>
@@ -104,7 +104,7 @@ Handle g_hOnPlayerDataLoaded;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.27",
+	name = "SuperHero Mod CS:GO v1.26",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
