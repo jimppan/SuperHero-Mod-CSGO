@@ -99,6 +99,14 @@ enum HeroEnum
 	availableLevel,
 }
 
+enum //PlayerData
+{
+	SH_DATA_PLAYER = 0,
+	SH_DATA_HEROES,
+	
+	SH_DATA_MAX,
+}
+
 //NATIVES
 
 // REQUIRED

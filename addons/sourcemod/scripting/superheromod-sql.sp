@@ -168,13 +168,13 @@ public void SQLQuery_LoadPlayerData(Database db, DBResultSet results, const char
 	int client = GetClientOfUserId(data);
 	if(client > 0 && client <= MaxClients)
 	{
-
 		if (results.RowCount == 0)
 		{	
 			g_iPlayerExperience[client] = g_StartExperience.IntValue;
 			g_iPlayerLevel[client] = GetPlayerLevel(client);
 			SetLevel(client, g_iPlayerLevel[client]);
 			//PrintToServer("No Saved XP to Load for %N", client);
+			g_bIsClientDataLoaded[client][SH_DATA_PLAYER] = true;
 			return;
 		}
 		
@@ -188,6 +188,8 @@ public void SQLQuery_LoadPlayerData(Database db, DBResultSet results, const char
 	
 		g_iPlayerFlags[client] = results.FetchInt(1);
 		skillCount = results.FetchInt(2);
+		g_bIsClientDataLoaded[client][SH_DATA_PLAYER] = true;
+		
 		char szQuery[4096];
 		Format(szQuery, sizeof(szQuery), "SELECT `HERO_NAME` FROM `sh_saveskills` WHERE `SH_KEY` = '%s' AND `SKILL_NUMBER` <= '%s' ORDER BY `SKILL_NUMBER` ASC", steamid, skillCount);
 		g_hPlayerData.Query(SQLQuery_LoadPlayerPowers, szQuery, data);
@@ -233,6 +235,9 @@ public void SQLQuery_LoadPlayerPowers(Database db, DBResultSet results, const ch
 			}
 		}
 		MemoryTableUpdate(client);
+		g_bIsClientDataLoaded[client][SH_DATA_HEROES] = true;
+		if(IsPlayerDataLoaded(client))
+			OnClientHeroDataLoaded(client);
 	}
 }
 public void SQLQuery_Void(Database db, DBResultSet results, const char[] error, any data)

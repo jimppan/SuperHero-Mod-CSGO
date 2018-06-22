@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.25"
+#define PLUGIN_VERSION "1.27"
 
 #include <sourcemod>
 #include <sdktools>
@@ -36,6 +36,7 @@ bool g_bNewRoundSpawn[MAXPLAYERS + 1];													//gNewRoundSpawn
 bool g_bPowerDown[MAXPLAYERS + 1][SH_MAXBINDPOWERS + 1];								//gInPowerDown
 bool g_bPlayerInCooldown[MAXPLAYERS + 1][SH_MAXHEROES + 1];								//gPlayerInCooldown - See superheromod.inc (AMX version) line 840 - Edit: I have no clue what this is even supposed to do, so ima make it cool down per hero
 bool g_bWeaponSwitchSpeedChange[MAXPLAYERS + 1] =  { true, ... }; 						//Should we change the speed of the player every time he changes weapons? (Useful for things like sh_shadowcat.sp noclip)
+bool g_bIsClientDataLoaded[MAXPLAYERS + 1][SH_DATA_MAX];
 int g_iPlayerExperience[MAXPLAYERS + 1]; 												//gPlayerXP
 int g_iPlayerLevel[MAXPLAYERS + 1]; 													//gPlayerLevel
 int g_iPlayerPowers[MAXPLAYERS + 1][SH_MAXLEVELS + 1]; 									//gPlayerPowers - List of all Powers - Slot 0 is the superpower count 
@@ -97,12 +98,13 @@ Handle g_hOnPlayerDeath;
 Handle g_hOnPlayerTakeDamage;
 Handle g_hOnPlayerTakeDamagePost;
 Handle g_hOnHeroBind;
+Handle g_hOnPlayerDataLoaded;
 
 #include "superheromod-sql.sp"
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.25",
+	name = "SuperHero Mod CS:GO v1.27",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -190,7 +192,8 @@ public void OnPluginStart()
 	g_hOnPlayerTakeDamage = 			CreateGlobalForward("SuperHero_OnPlayerTakeDamage", ET_Ignore, Param_Cell, Param_CellByRef, Param_CellByRef, Param_CellByRef, Param_CellByRef, Param_CellByRef, Param_Array, Param_Array);
 	g_hOnPlayerTakeDamagePost =			CreateGlobalForward("SuperHero_OnPlayerTakeDamagePost", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
 	g_hOnHeroBind = 					CreateGlobalForward("SuperHero_OnHeroBind", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
-
+	g_hOnPlayerDataLoaded =				CreateGlobalForward("SuperHero_OnPlayerDataLoaded", ET_Ignore, Param_Cell);
+	
 	g_hHeroHudSync = 					CreateHudSynchronizer();
 	g_hHelpCooldownSync =				CreateHudSynchronizer();
 
@@ -221,7 +224,7 @@ public void OnPluginStart()
 			OnClientPutInServer(i);
 			
 		for (int j = 0; j <= SH_MAXHEROES;j++)
-			g_hCoolDownTimers[i][j] = INVALID_HANDLE;
+			g_hCoolDownTimers[i][j] = null;
 	}
 	
 	CreateTimer(1.0, Timer_All, _, TIMER_REPEAT);
@@ -1736,20 +1739,27 @@ public void OnClientPutInServer(int client)
 
 public void OnClientPostAdminCheck(int client)
 {
-	if(!IsFakeClient(client))
+	if(!IsFakeClient(client) && !IsPlayerDataLoaded(client))
 		LoadData(client);
+}
+
+public void OnClientHeroDataLoaded(int client)
+{
+	Call_StartForward(g_hOnPlayerDataLoaded);
+	Call_PushCell(client);
+	Call_Finish();
 }
 
 public void OnClientDisconnect(int client)
 {
-	if(IsClientInGame(client) && !IsFakeClient(client))
+	if(IsClientInGame(client) && !IsFakeClient(client) && IsPlayerDataLoaded(client))
 		WriteData(client);
 		
 	for (int i = 0; i <= SH_MAXHEROES; i++)
 	{
-		if(g_hCoolDownTimers[client][i] != INVALID_HANDLE)
+		if(g_hCoolDownTimers[client][i] != null)
 			KillTimer(g_hCoolDownTimers[client][i]);
-		g_hCoolDownTimers[client][i] = INVALID_HANDLE;
+		g_hCoolDownTimers[client][i] = null;
 	}
 		
 	int ent = EntRefToEntIndex(g_iGlowEntities[client]);
@@ -1806,6 +1816,19 @@ public void OnMapStart()
 	SetConVarInt(FindConVar("mp_free_armor"), 2);
 	
 	CreateTimer(g_SaveExperienceInterval.FloatValue, Timer_SaveExperience, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public void OnMapEnd()
+{
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		for (int j = 0; j <= SH_MAXHEROES; j++)
+		{
+			if(g_hCoolDownTimers[i][j] != null)
+				KillTimer(g_hCoolDownTimers[i][j]);
+			g_hCoolDownTimers[i][j] = null;
+		}
+	}
 }
 
 //////////////
@@ -1883,7 +1906,7 @@ public Action Timer_Cooldown(Handle timer, DataPack pack)
 	int heroIndex = pack.ReadCell();
 
 	g_bPlayerInCooldown[client][heroIndex] = false;
-	g_hCoolDownTimers[client][heroIndex] = INVALID_HANDLE;
+	g_hCoolDownTimers[client][heroIndex] = null;
 	return Plugin_Stop;
 }
 
@@ -2026,9 +2049,9 @@ stock bool PlayerHasPower(int client, int heroIndex)
 
 stock void EndPlayerHeroCooldown(int client, int heroIndex)
 {
-	if(g_hCoolDownTimers[client][heroIndex] != INVALID_HANDLE)
+	if(g_hCoolDownTimers[client][heroIndex] != null)
 		KillTimer(g_hCoolDownTimers[client][heroIndex]);
-	g_hCoolDownTimers[client][heroIndex] = INVALID_HANDLE;
+	g_hCoolDownTimers[client][heroIndex] = null;
 	g_bPlayerInCooldown[client][heroIndex] = false;
 	g_fPlayerCooldownEndTime[client][heroIndex] = 0.0;
 }
@@ -2101,11 +2124,14 @@ stock void InitializePlayer(int client)
 	
 	for (int i = 0; i <= SH_MAXHEROES; i++)
 	{
-		if(g_hCoolDownTimers[client][i] != INVALID_HANDLE)
+		if(g_hCoolDownTimers[client][i] != null)
 			KillTimer(g_hCoolDownTimers[client][i]);
-		g_hCoolDownTimers[client][i] = INVALID_HANDLE;
+		g_hCoolDownTimers[client][i] = null;
 	}
 	
+	for (int i = 0; i < SH_DATA_MAX; i++)
+		g_bIsClientDataLoaded[client][i] = false;
+
 	int heroIndex;
 
 	// Clear the power before sending the drop init
@@ -2121,6 +2147,14 @@ stock void InitializePlayer(int client)
 		if ( heroIndex != -1) 
 			InitializeHero(client, heroIndex, SH_HERO_DROP); // Disable this power
 	}
+}
+
+stock bool IsPlayerDataLoaded(int client)
+{
+	for (int i = 0; i < SH_DATA_MAX; i++)
+		if(!g_bIsClientDataLoaded[client][i])
+			return false;
+	return true;
 }
 
 stock void InitializeHero(int client, int heroIndex, int mode)
