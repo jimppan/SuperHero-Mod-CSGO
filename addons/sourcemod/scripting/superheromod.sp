@@ -1,7 +1,7 @@
 #pragma semicolon 1
 
 #define PLUGIN_AUTHOR "Rachnus"
-#define PLUGIN_VERSION "1.26"
+#define PLUGIN_VERSION "1.27"
 
 #include <sourcemod>
 #include <sdktools>
@@ -91,6 +91,9 @@ ConVar g_AmountOfMoneyPaidForExperience;
 ConVar g_AmountOfBuyExperience;
 ConVar g_SaveExperienceInterval;
 
+/* Existing cvars */
+ConVar g_MpTeammatesAreEnemies;
+
 //Forwards
 Handle g_hOnHeroInitialized;
 Handle g_hOnPlayerSpawned;
@@ -104,7 +107,7 @@ Handle g_hOnPlayerDataLoaded;
 
 public Plugin myinfo = 
 {
-	name = "SuperHero Mod CS:GO v1.26",
+	name = "SuperHero Mod CS:GO v1.27",
 	author = PLUGIN_AUTHOR,
 	description = "Remake/Port of SuperHero mod for AMX Mod (Counter-Strike 1.6) by vittu/batman",
 	version = PLUGIN_VERSION,
@@ -226,6 +229,8 @@ public void OnPluginStart()
 		for (int j = 0; j <= SH_MAXHEROES;j++)
 			g_hCoolDownTimers[i][j] = null;
 	}
+	
+	g_MpTeammatesAreEnemies = FindConVar("mp_teammates_are_enemies");
 	
 	CreateTimer(1.0, Timer_All, _, TIMER_REPEAT);
 	AutoExecConfig(true, "superheromod");
@@ -1012,7 +1017,7 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
 	
 	if(IsValidClient(attacker) && IsValidClient(victim) && attacker != victim)
 	{
-		if(GetClientTeam(attacker) == GetClientTeam(victim))
+		if(GetClientTeam(attacker) == GetClientTeam(victim) && !g_MpTeammatesAreEnemies.BoolValue)
 		{
 			LocalAddExperience(attacker, -g_iGivenExperience[g_iPlayerLevel[victim]]);
 		}
